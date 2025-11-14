@@ -18,7 +18,7 @@
         <a class="active" href="index.php">Home</a>
         <a href="#news">News</a>
         <a href="#contact">Contact</a>
-        <a href="#about">About</a>
+        <a href="Search">Search</a>
         <a href="login.php">Log in</a>
         <a href="register.php">Register</a>
     </div>
