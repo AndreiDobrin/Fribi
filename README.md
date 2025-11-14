@@ -45,31 +45,40 @@ template). Aceasta va conține datele clientului, produsele cumpărate, suma tot
 și data comenzii.
 
 ## Baza de date
-[Andrei_Dobrin_241PHP-1.pdf](https://github.com/user-attachments/files/23523661/Andrei_Dobrin_241PHP-1.pdf)
+
+![php_database](https://github.com/user-attachments/assets/6d8074f4-5d78-4366-b289-3edd8371d8e4)
 
 USER – va avea coloana privilege, pe lângă detaliile personale uzuale, care va
 determina daca utilizatorul respectiv este un utilizator normal sau privilegiat, care poate
 schimba valorile unui produs;
+
 COMPANY – reprezintă magazinul din care face parte un produs (nu marca). De
 exemplu: Auchan, Freshful, Carrefour, Mega Image, etc. . Acest tabel va fi folositor
 pentru a vedea la ce magazine se regăsesc produsele și in backend cât și în frontend.
 Produsele pe care le are o companie respectivă se regăsesc în tabelul intermediar
 COMPANY_PRODUCTS;
+
 CART – coșul de cumpărături al utilizatorului. Articolele efective se vor pune în tabelul
 intermediar CART_PRODUCTS;
+
+
 PRODUCT – promoțiile curente se vor stoca în coloana “offer”. Va trebui implementat și
 un historical low sau o altă metodă pentru a vedea ce prețuri a mai avut in trecut.
 Aceste produse fac parte dintr-o categorie după care se poate face căutarea (tabelul
 CATEGORY);
+
 SHOPPING_ORDER – Aici se regăsesc comenzile utilizatorilor, unde fiecare comandă
 are un status predefinit, default începând cu “Pending”. Totodată, se regăsește și data
 plasării comenzii și suma totală. Produsele efective se regăsesc în tabelul intermediar
 ORDER_PRODUCTS, care are coloana “price_at_purchase”, pentru a nu procesa
 mereu datele produsului și pentru că prețul produsului se poate schimba;
+
 REVIEW – Se pot lăsa recenzii produselor (utilizatorul nu poate lăsa mai multe recenzii
 aceluiași produs, dar își poate actualiza recenzia), oferind un scor de la 1 la 5 și,
 opțional, să fie lăsat un comentariu. Se stochează data la care a fost creat cu
 “current_timestamp” și daca va fi actualizat se va stoca și acea dată;
+
 NEWSLETTER – Utilizatorii se pot abona la un newsletter pentru un produs sau o
 categorie de produse (trebuie să fie logați). Utilizatorul care este abonat la newsletter-ul
 unui produs va primi un e-mail atunci când produsul face parte dintr-o promoție;
+
