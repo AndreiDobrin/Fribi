@@ -10,19 +10,18 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <h1>CREATION</h1>
-        <form action="register.php" method="post">
-            <label for="nume">Nume:</label><br>
-            <input type="text" id="nume" name="nume"><br>
-            <label for="prenume">Prenume:</label><br>
-            <input type="text" id="prenume" name="prenume"><br>
-            <label for="email">E-Mail:</label><br>
-            <input type="text" id="email" name="email"><br>
-            <input type="submit">
-        </form>
+    <div class="topnav">
+        <a class="active" href="index.php">Home</a>
+        <a href="#news">News</a>
+        <a href="#contact">Contact</a>
+        <a href="#about">About</a>
+        <a href="login.php">Log in</a>
+        <a href="register.php">Register</a>
+    </div>
     </body>
     <?php
         if (!empty($status)) {

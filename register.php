@@ -1,44 +1,37 @@
     <?php
         session_start(); //daca se foloseste variabila $_SESSION, este necesara apelarea functiei session_start
         //include 'index1.php';
-        require_once 'database.php';
-        try {
-    $pdo = Database::getInstance()->getConnection();
-    echo "✅ Connection successful!<br>";
-        } catch (PDOException $e) {
-            die("❌ Connection failed: " . $e->getMessage());
+        if(isset($_SESSION['status'])) {
+            $status = $_SESSION['status'];
+            unset($_SESSION['status']);
         }
+        ?>
+    <!DOCTYPE HTML>
+    <head>
+        <link rel="stylesheet" href="styles.css">
+    </head>
+    <body>
+        <div class="topnav">
+            <a class="active" href="index.php">Home</a>
+            <a href="#news">News</a>
+            <a href="#contact">Contact</a>
+            <a href="#about">About</a>
+            <a href="login.php">Log in</a>
+            <a href="register.php">Register</a>
+        </div>
+        <form action="register_func.php" method="post">
+            <label for="nume">Nume:</label><br>
+            <input type="text" id="nume" name="nume"><br>
+            <label for="prenume">Prenume:</label><br>
+            <input type="text" id="prenume" name="prenume"><br>
+            <label for="email">E-Mail:</label><br>
+            <input type="text" id="email" name="email"><br>
+            <input type="submit">
 
-        if(isset($_POST['email']) && isset($_POST['nume']) && isset($_POST['prenume']))  {
-            $email = $_POST['email'];
-
-        try {
-            $pdo = Database::getInstance()->getConnection();
-                    $sql = "SELECT email FROM user WHERE email = ?";
-            $stmt = $pdo->prepare($sql);
-
-
-            $stmt->execute([$email]);
-            $results = $stmt->fetch(PDO::FETCH_ASSOC);
-            if($results){
-                echo $results['email'];
-                $_SESSION['status'] = "Acest e-mail este deja inregistrat";
-                header("Location: index1.php");
-                exit;
+        <?php
+            if (!empty($status)) {
+                echo "<div class='status-message'>" . htmlspecialchars($status) . "</div>";
             }
-            else {
-                $sql = "INSERT INTO user (nume, prenume, email) VALUES (?, ?, ?)";
-                $stmt = $pdo -> prepare($sql);
-                $stmt -> execute([$_POST['nume'], $_POST['prenume'], $_POST['email']]);
-                $_SESSION['status'] = "Inregistrat cu succes";
-                header("Location: index1.php");
-                exit;
-            }
-            //echo "<script type='text/javascript'>alert($results[email]);</script>";
-        } catch (PDOException $e) {
-            die("❌ Connection failed: " . $e->getMessage());
-        }
-            //header("Location: index1.php");
-    }
-
-    ?>
+        ?>
+        </form>
+    </body>
