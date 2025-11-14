@@ -1,3 +1,12 @@
+<?php
+    session_start(); //check if user is already registered
+
+    if(isset($_SESSION['status'])) {
+        $status = $_SESSION['status'];
+        unset($_SESSION['status']);
+    }
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -16,6 +25,9 @@
         </form>
     </body>
     <?php
+        if (!empty($status)) {
+            echo "<div class='status-message'>" . htmlspecialchars($status) . "</div>";
+        }
         require_once 'database.php';
         try {
     $pdo = Database::getInstance()->getConnection();
@@ -41,5 +53,7 @@
         } catch (PDOException $e) {
             die("❌ Connection failed: " . $e->getMessage());
         }
+
+
     ?>
 </html>
