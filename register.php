@@ -1,4 +1,5 @@
     <?php
+        //include 'index1.php';
         require_once 'database.php';
         try {
     $pdo = Database::getInstance()->getConnection();
@@ -7,27 +8,28 @@
             die("❌ Connection failed: " . $e->getMessage());
         }
 
-
+        if(isset($_POST['email']) ) {
+            $email = $_POST['email'];
+        }
 
         try {
-            echo "ok";
             $pdo = Database::getInstance()->getConnection();
-                    $sql = "INSERT INTO user (nume, prenume, email) 
-                    VALUES (:lname, :fname, :e_mail)";
-
+                    $sql = "SELECT email FROM user WHERE email = ?";
             $stmt = $pdo->prepare($sql);
 
-            // Sample data
-            $data = [
-                'lname' => $_POST['nume'] ?? $nume,
-                'fname' => $_POST['prenume'] ?? $prenume,
-                'e_mail' => $_POST['email'] ?? $email
-            ];
-        
-            $stmt->execute($data);
+
+            $stmt->execute([$email]);
+            $results = $stmt->fetch(PDO::FETCH_ASSOC);
+            if($results){
+                echo($results['email']);
+            }
+            else {
+                echo "Nu exista";
+            }
+            //echo "<script type='text/javascript'>alert($results[email]);</script>";
         } catch (PDOException $e) {
             die("❌ Connection failed: " . $e->getMessage());
         }
+            //header("Location: index1.php");
 
-        header("Location: index1.php");
     ?>

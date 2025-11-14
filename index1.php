@@ -11,7 +11,7 @@
             <label for="prenume">Prenume:</label><br>
             <input type="text" id="prenume" name="prenume"><br>
             <label for="email">E-Mail:</label><br>
-            <textarea id="email" name="email"></textarea><br>
+            <input type="text" id="email" name="email"><br>
             <input type="submit">
         </form>
     </body>
@@ -25,12 +25,7 @@
         }
 
 
-
         try {
-
-
-
-
             $sql = "SELECT * from user";
                 
             $stmt = $pdo->prepare($sql);
