@@ -49,6 +49,6 @@ class Database {
 }
 
 
-echo "Server time is: " . date('Y-m-d H:i:s');
-echo "\n";
+//echo "Server time is: " . date('Y-m-d H:i:s');
+//echo "\n";
 ?>

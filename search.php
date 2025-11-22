@@ -13,9 +13,9 @@
             <a href="login.php">Log in</a>
             <a href="register.php">Register</a>
         </div>
-            <form>
+            <form action="search_submit.php" method="post">
                 <!--<input list="table"> -->
-                <select id="table">
+                <select name="table" id="table">
                                 <?php
                                     require_once 'database.php';
                                     try {
@@ -29,16 +29,15 @@
                                     $stmt = $pdo->prepare($sql);
                                     $stmt->execute();
                                     $tables = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-                                    foreach($tables as $table) {
-                                        echo '<option value='. $table["Tables_in_andrei"] .'>' . $table["Tables_in_andrei"] . '</option>';
+                                    foreach($tables as $table_value) {
+                                        echo '<option value='. $table_value["Tables_in_andrei"] .'>' . $table_value["Tables_in_andrei"] . '</option>';
                                     }
                                     echo '</select>';
                 
                 ?>
+                <div id="response"></div>
                 <input type="submit" value="Search">
             </form>
-            <div id="response"></div>
             <script src="search_input_check.js"></script>       
     </body>
 

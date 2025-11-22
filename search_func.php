@@ -32,7 +32,7 @@ if (isset($data) && isset($data->table)) {
                     $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
                     $x = 1;
                     foreach($columns as $column) {
-                        echo '<input class="column'. $x .'" placeholder='. $column["Field"] .'>';
+                        echo '<input type="text" name="' . $column["Field"] . '" class="column'. $x .'" id='.$column["Field"].' placeholder='. $column["Field"] .'>';
                         //echo '<select id=column'. $x .'.>';
                         echo '</input>';
                         $x += 1;
