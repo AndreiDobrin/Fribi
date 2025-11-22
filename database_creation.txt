@@ -1,0 +1,111 @@
+CREATE TABLE user (
+	id INT NOT NULL AUTO_INCREMENT,
+    nume VARCHAR(30) NOT NULL,
+    prenume VARCHAR(30) NOT NULL,
+    email VARCHAR(30) NOT NULL,
+    nr_tel VARCHAR(20) NULL,
+    privilege ENUM('User','Admin') DEFAULT 'User' NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE cart (
+	id INT NOT NULL AUTO_INCREMENT,
+    id_user INT NOT NULL,
+    PRIMARY KEY(id),
+    FOREIGN KEY (id_user) REFERENCES user(id)
+);
+
+CREATE TABLE category (
+	id INT NOT NULL auto_increment,
+    nume VARCHAR(20) NOT NULL,
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE product(
+	id INT NOT NULL AUTO_INCREMENT,
+    id_category INT NOT NULL,
+    price DECIMAL(10,2) NOT NULL,
+    offer INT DEFAULT 0 NOT NULL,
+    product_name VARCHAR(50),
+    product_description VARCHAR(200),
+    ingredients VARCHAR(200),
+    PRIMARY KEY(id),
+    FOREIGN KEY(id_category) REFERENCES category(id)
+);
+
+CREATE TABLE cart_products (
+	id_cart INT NOT NULL,
+    id_product INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    
+    PRIMARY KEY(id_cart, id_product),
+    FOREIGN KEY(id_cart) REFERENCES cart(id),
+    FOREIGN KEY(id_product) REFERENCES product(id)
+);
+
+CREATE TABLE company (
+	id INT NOT NULL auto_increment,
+    name VARCHAR(20),
+    
+    PRIMARY KEY(id)
+);
+
+CREATE TABLE company_products (
+	id_company INT NOT NULL,
+    id_product INT NOT NULL,
+    stock BOOLEAN NOT NULL DEFAULT 0,
+    
+    PRIMARY KEY(ID_COMPANY, ID_PRODUCT),
+    FOREIGN KEY(ID_COMPANY) REFERENCES COMPANY(ID),
+    FOREIGN KEY(ID_PRODUCT) REFERENCES PRODUCT(ID)
+);
+
+CREATE TABLE shopping_order (
+	ID INT NOT NULL AUTO_INCREMENT,
+    ID_USER INT NOT NULL,
+    ORDER_DATE timestamp NOT NULL DEFAULT current_timestamp,
+    STATUS ENUM('Pending', 'Paid', 'Preparing', 'Ready', 'In delivery', 'Arrived', 'Completed', 'Cancelled', 'Refunded') DEFAULT 'Pending' NOT NULL,
+    TOTAL_AMOUNT DECIMAL(10,2) NOT NULL,
+    SHIPPING_ADDRESS VARCHAR(50) NOT NULL,
+    PAYMENT_METHOD VARCHAR(20) NOT NULL DEFAULT 'Cash',
+    DETAILS VARCHAR(100) NULL,
+    
+    PRIMARY KEY(ID, ID_USER),
+    FOREIGN KEY(ID_USER) REFERENCES USER(ID)
+);
+
+CREATE TABLE order_products (
+	id_order INT NOT NULL,
+    id_product INT NOT NULL,
+    quantity INT NOT NULL DEFAULT 1,
+    price_at_purchase DECIMAL(10,2) NOT NULL,
+    
+    PRIMARY KEY(ID_ORDER, ID_PRODUCT),
+    FOREIGN KEY(ID_ORDER) REFERENCES SHOPPING_ORDER(ID) ON DELETE CASCADE,
+    FOREIGN KEY(ID_PRODUCT) REFERENCES PRODUCT(ID)
+);
+
+CREATE TABLE REVIEW (
+	ID_USER INT NOT NULL,
+    ID_PRODUCT INT NOT NULL,
+    RATING ENUM('1', '2', '3', '4', '5') NOT NULL,
+    REVIEW_DESCRIPTION VARCHAR(200) NULL,
+    CREATED_AT timestamp NOT NULL DEFAULT current_timestamp,
+    UPDATED_AT timestamp NULL,
+    
+    PRIMARY KEY(ID_USER, ID_PRODUCT),
+    FOREIGN KEY(ID_USER) REFERENCES USER(ID),
+    FOREIGN KEY(ID_PRODUCT) REFERENCES PRODUCT(ID)
+);
+
+CREATE TABLE NEWSLETTER (
+	id INT NOT NULL AUTO_INCREMENT,
+    ID_USER INT NOT NULL,
+    ID_PRODUCT INT NULL,
+    ID_CATEGORY INT NULL,
+    
+    PRIMARY KEY(ID),
+    FOREIGN KEY(id_user) REFERENCES USER(ID),
+    FOREIGN KEY(ID_PRODUCT) REFERENCES PRODUCT(ID),
+    FOREIGN KEY(ID_CATEGORY) REFERENCES CATEGORY(ID)
+); ENGINE=INNODB;

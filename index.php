@@ -5,6 +5,17 @@
         $status = $_SESSION['status'];
         unset($_SESSION['status']);
     }
+
+    if (!empty($status)) {
+        echo "<div class='status-message'>" . htmlspecialchars($status) . "</div>";
+    }
+    require_once 'database.php';
+    try {
+        $pdo = Database::getInstance()->getConnection();
+        //echo "✅ Connection successful!<br>";
+    } catch (PDOException $e) {
+        die("❌ Connection failed: " . $e->getMessage());
+    }
 ?>
 
 <!DOCTYPE html>
@@ -18,23 +29,24 @@
         <a class="active" href="index.php">Home</a>
         <a href="#news">News</a>
         <a href="#contact">Contact</a>
-        <a href="Search">Search</a>
+        <a href="search.php">Search</a>
         <a href="login.php">Log in</a>
         <a href="register.php">Register</a>
     </div>
     </body>
     <?php
-        if (!empty($status)) {
-            echo "<div class='status-message'>" . htmlspecialchars($status) . "</div>";
-        }
-        require_once 'database.php';
         try {
-    $pdo = Database::getInstance()->getConnection();
-    echo "✅ Connection successful!<br>";
+            $test = 'user';
+            $sql = "Describe `".$test."`";
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute();
+            $columns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            foreach($columns as $column) {
+                echo '<h3>' . $column["Field"] . '</h3>';
+            }
         } catch (PDOException $e) {
             die("❌ Connection failed: " . $e->getMessage());
         }
-
 
         try {
             $sql = "SELECT * from user";
