@@ -47,13 +47,18 @@
                 foreach($table_columns as $table_column) {
                     echo '<h4>'. $table_column["Field"]. ': ' . $result[$table_column["Field"]] . '</h4>';
                 }
-            echo "
-                <form action=\"delete.php\" method=\"post\">
-                    <input type=\"hidden\" name=\"{$table_columns[0]['Field']}\" value=\"{$results[0][$table_column['Field']]}\">
-                    <button type=\"submit\" name=\"action\" value=\"delete_action\">Delete</button>
-                    <button type=\"submit\" name=\"action\" value=\"modify_action\">Modify</button></div>
+            echo <<<HTML
+                <form action="delete.php" method="post" style="border: 1px solid #9c9c9cff; padding: 10px; margin-bottom: 10px;">
+                    <input type="hidden" name="table_name" value="{$queried_table}">
+                        
+                    <input type="hidden" name="pk_name" value="{$table_columns[0]['Field']}">
+                        
+                    <input type="hidden" name="pk_value" value="{$result[$table_columns[0]['Field']]}">
+                        
+                    <button type="submit" name="action" value="delete_action" style="color: red;">Delete</button>
+                    <button type="submit" name="action" value="modify_action">Modify</button>
                 </form>
-                ";
+            HTML;
             }
 /*
             foreach($results as $result) {
