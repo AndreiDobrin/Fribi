@@ -2,6 +2,7 @@
 .topnav {
   background-color: #333;
   overflow: hidden;
+  border-radius:10px;
 }
 
 /* Style the links inside the navigation bar */
@@ -24,8 +25,4 @@
 .topnav a.active {
   background-color: #04AA6D;
   color: white;
-}
-
-#response {
-  display:block;
 }

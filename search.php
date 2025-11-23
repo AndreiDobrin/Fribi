@@ -13,7 +13,8 @@
             <a href="login.php">Log in</a>
             <a href="register.php">Register</a>
         </div>
-            <form action="search_submit.php" method="post">
+        <div class="searchform">
+            <form class="form" action="search_submit.php" method="post">
                 <!--<input list="table"> -->
                 <select name="table" id="table">
                                 <?php
@@ -38,7 +39,8 @@
                 <div id="response"></div>
                 <input type="submit" value="Search">
             </form>
-            <script src="search_input_check.js"></script>       
+            </div>
+            <script src="search_input_check.js"></script>      
     </body>
 
     <?php

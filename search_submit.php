@@ -30,7 +30,7 @@
                     if ($count > 0) {
                         $sql = $sql . " " . "AND ";
                     }
-                    $sql = $sql . "" . $table_columns[$x]['Field'] ." = ". $_POST[$table_columns[$x]['Field']];
+                    $sql = $sql . "" . $table_columns[$x]['Field'] ." = '".$_POST[$table_columns[$x]['Field']]."'";
 
                     echo " $sql </h1>";
                     $count ++;
@@ -43,9 +43,17 @@
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
             //var_dump($results);
             foreach($results as $result) {
+                echo '<div id="result">';
                 foreach($table_columns as $table_column) {
-                echo '<h1>'. $table_column["Field"]. ': ' . $result[$table_column["Field"]] . '</h1>';
-            }
+                    echo '<h4>'. $table_column["Field"]. ': ' . $result[$table_column["Field"]] . '</h4>';
+                }
+            echo "
+                <form action=\"delete.php\" method=\"post\">
+                    <input type=\"hidden\" name=\"{$table_columns[0]['Field']}\" value=\"{$results[0][$table_column['Field']]}\">
+                    <button type=\"submit\" name=\"action\" value=\"delete_action\">Delete</button>
+                    <button type=\"submit\" name=\"action\" value=\"modify_action\">Modify</button></div>
+                </form>
+                ";
             }
 /*
             foreach($results as $result) {
@@ -58,15 +66,7 @@
             }
 */
 
-            echo '<pre>';
 
-// Shows types and values (Best for debugging)
-var_dump($_POST); 
-
-// OR: Shows structure only (Cleaner look)
-// print_r($_POST);
-
-echo '</pre>';
 
         }  catch (PDOException $e) {
             die("❌ Connection failed: " . $e->getMessage());
