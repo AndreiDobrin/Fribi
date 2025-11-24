@@ -1,6 +1,9 @@
     <?php
         session_start(); //daca se foloseste variabila $_SESSION, este necesara apelarea functiei session_start
         //include 'index1.php';
+        if(!$_SESSION['username']) {
+            header('Location: login.php');
+        }
         if(isset($_SESSION['status'])) {
             $status = $_SESSION['status'];
             unset($_SESSION['status']);
@@ -14,8 +17,16 @@
         <div class="topnav">
             <a class="active" href="index.php">Home</a>
             <a href="search.php">Search</a>
-            <a href="login.php">Log in</a>
-            <a href="register.php">Register</a>
+            <?php
+                if($_SESSION['username']) {
+                    echo '<a href="logout.php">Log out</a>';
+                    echo "<a>".$_SESSION['username']. "</a>";
+                    echo '<a href="register.php">Register</a>';
+                }
+                else {
+                    echo '<a href="login.php">Log in</a>';
+                }
+            ?>
         </div>
         <form action="register_func.php" method="post">
             <label for="nume">Nume:</label><br>
