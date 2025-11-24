@@ -29,9 +29,9 @@
                                     $sql = "SHOW TABLES";
                                     $stmt = $pdo->prepare($sql);
                                     $stmt->execute();
-                                    $tables = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                                    $tables = $stmt->fetchAll(PDO::FETCH_NUM);
                                     foreach($tables as $table_value) {
-                                        echo '<option value='. $table_value["Tables_in_andrei"] .'>' . $table_value["Tables_in_andrei"] . '</option>';
+                                        echo '<option value="'. $table_row[0] .'">' . $table_row[0] . '</option>';
                                     }
                                     echo '</select>';
                 
