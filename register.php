@@ -13,8 +13,6 @@
     <body>
         <div class="topnav">
             <a class="active" href="index.php">Home</a>
-            <a href="#news">News</a>
-            <a href="#contact">Contact</a>
             <a href="search.php">Search</a>
             <a href="login.php">Log in</a>
             <a href="register.php">Register</a>
@@ -28,7 +26,7 @@
             <input type="text" id="email" name="email"><br>
             <label for="parola">Parola:</label><br>
             <input type="text" id="parola" name="parola"><br>
-            <input type="submit">
+            <input type="submit" value="Register">
 
         <?php
             if (!empty($status)) {

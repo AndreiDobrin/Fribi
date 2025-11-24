@@ -1,5 +1,8 @@
 <?php
-    session_start(); //check if user is already registered
+    session_start();
+    if(!$_SESSION['username']) {
+        header('Location: login.php');
+    }
 
     if(isset($_SESSION['status'])) {
         $status = $_SESSION['status'];
@@ -27,11 +30,17 @@
 <body>
     <div class="topnav">
         <a class="active" href="index.php">Home</a>
-        <a href="#news">News</a>
-        <a href="#contact">Contact</a>
         <a href="search.php">Search</a>
-        <a href="login.php">Log in</a>
-        <a href="register.php">Register</a>
+        <?php
+            if($_SESSION['username']) {
+                echo '<a href="logout.php">Log out</a>';
+                echo "<a>".$_SESSION['username']. "</a>";
+                echo '<a href="register.php">Register</a>';
+            }
+            else {
+                echo '<a href="login.php">Log in</a>';
+            }
+        ?>
     </div>
     </body>
     <?php

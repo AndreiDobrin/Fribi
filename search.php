@@ -1,3 +1,20 @@
+<?php
+    session_start();
+    if(!$_SESSION['username']) {
+    header('Location: login.php');
+}
+
+    require_once 'database.php';
+        try {
+            $pdo = Database::getInstance()->getConnection();
+            // echo "✅ Connection successful!<br>";
+        } 
+        catch (PDOException $e) {
+            die("❌ Connection failed: " . $e->getMessage());
+        }
+    
+
+?>
 <!DOCTYPE html>
 
     <head>
@@ -6,12 +23,18 @@
 
     <body>
         <div class="topnav">
-            <a class="active" href="index.php">Home</a>
-            <a href="#news">News</a>
-            <a href="#contact">Contact</a>
-            <a href="search.php">Search</a>
-            <a href="login.php">Log in</a>
-            <a href="register.php">Register</a>
+        <a class="active" href="index.php">Home</a>
+        <a href="search.php">Search</a>
+        <?php
+            if($_SESSION['username']) {
+                echo '<a href="logout.php">Log out</a>';
+                echo "<a>".$_SESSION['username']. "</a>";
+                echo '<a href="register.php">Register</a>';
+            }
+            else {
+                echo '<a href="login.php">Log in</a>';
+            }
+        ?>
         </div>
         <div class="searchform">
             <form class="form" action="search_submit.php" method="post">
