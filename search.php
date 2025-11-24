@@ -30,7 +30,7 @@
                                     $stmt = $pdo->prepare($sql);
                                     $stmt->execute();
                                     $tables = $stmt->fetchAll(PDO::FETCH_NUM);
-                                    foreach($tables as $table_value) {
+                                    foreach($tables as $table_row) {
                                         echo '<option value="'. $table_row[0] .'">' . $table_row[0] . '</option>';
                                     }
                                     echo '</select>';
