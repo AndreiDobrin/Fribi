@@ -3,6 +3,7 @@
         nume VARCHAR(30) NOT NULL,
         prenume VARCHAR(30) NOT NULL,
         email VARCHAR(30) NOT NULL,
+        parola VARCHAR(40) NOT NULL,
         nr_tel VARCHAR(20) NULL,
         privilege ENUM('User','Admin') DEFAULT 'User' NOT NULL,
         PRIMARY KEY (id)

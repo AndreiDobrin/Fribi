@@ -26,6 +26,8 @@
             <input type="text" id="prenume" name="prenume"><br>
             <label for="email">E-Mail:</label><br>
             <input type="text" id="email" name="email"><br>
+            <label for="parola">Parola:</label><br>
+            <input type="text" id="parola" name="parola"><br>
             <input type="submit">
 
         <?php

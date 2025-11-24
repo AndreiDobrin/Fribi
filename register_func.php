@@ -28,9 +28,9 @@
                 exit;
             }
             else {
-                $sql = "INSERT INTO user (nume, prenume, email) VALUES (?, ?, ?)";
+                $sql = "INSERT INTO user (nume, prenume, email, parola) VALUES (?, ?, ?, ?)";
                 $stmt = $pdo -> prepare($sql);
-                $stmt -> execute([$_POST['nume'], $_POST['prenume'], $_POST['email']]);
+                $stmt -> execute([$_POST['nume'], $_POST['prenume'], $_POST['email'], $_POST['parola']]);
                 $_SESSION['status'] = "Inregistrat cu succes";
                 header("Location: register.php");
                 exit;
