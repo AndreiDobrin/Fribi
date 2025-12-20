@@ -23,7 +23,7 @@ try:
         record = cursor.fetchone()
         print(f"You're connected to database: {record}")
 
-
+        # PRODUCTS FETCH
         cursor = connection.cursor()
         cursor.execute("SELECT * FROM product")
         products = cursor.fetchall()
@@ -53,10 +53,9 @@ try:
 
         # infinite scroll
         last_height = driver.execute_script("return document.body.scrollHeight")
-        '''
         while True:
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-            time.sleep(2)
+            driver.execute_script("window.scrollTo(0, document.body.scrollHeight-2000);")
+            time.sleep(5)
             new_height = driver.execute_script("return document.body.scrollHeight")
 
             if new_height == last_height:
@@ -64,8 +63,8 @@ try:
                 break
 
             last_height = new_height
-            #print(f"Scrolled to: {new_height}")
-        '''
+            print(f"Scrolled to: {new_height}")
+            
         # salveaza codul html
         html = driver.page_source
 
@@ -83,7 +82,12 @@ try:
             brand = item.find(attrs={"data-testid": "product-brand"}).text.strip() #brand produs
             
             #verificare daca produs deja exista
-            if (name,brand) in products:
+            ok = 1
+            for product in products:
+                if product[4] == name and product[8] == brand:
+                    ok = 0
+                    break
+            if ok == 0:
                 print(f"Articolul {brand} {name} deja exista...") # DE VERIFICAT DACA DETALIILE PRODUSULUI S-AU SCHIMBAT
             else:
                 price_per_unit = item.find(attrs={"data-testid": "product-block-price-per-unit"}).text.strip() #pret per kg/l produs
@@ -93,7 +97,8 @@ try:
                 old_price = "" #in caz de promotie, pretul produsului fara reducere
                 old_ppu = "" #in caz de promotie, pretul produsului per kg/l fara reducere
                 image = item.find(attrs={"data-testid": "product-block-image"})
-                image_src = image['src']
+                if image:
+                    image_src = image['src']
 
                 if item.find(attrs={"data-testid":"tag-promo"}): #daca exista butonul cu id de promotie, se insereaza valoarea promotiei si se cauta si pretul vechi
                     promo = item.find(attrs={"data-testid":"tag-promo"}).text.strip()
