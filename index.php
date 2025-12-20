@@ -58,7 +58,7 @@
         }
 
         try {
-            $sql = "SELECT * from user";
+            $sql = "SELECT * from PRODUCT";
                 
             $stmt = $pdo->prepare($sql);
             $stmt->execute();
