@@ -8,10 +8,10 @@ try:
     # 1. Establish the connection
     connection = mysql.connector.connect(
         host='localhost',
-        port='3307',                 # Default XAMPP host
-        database='andrei',        # Your database name
-        user='root',               # Default XAMPP user
-        password=''                # Default XAMPP password is empty
+        port='3307',
+        database='andrei',
+        user='root',
+        password=''
     )
 
     if connection.is_connected():
