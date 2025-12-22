@@ -3,24 +3,29 @@ from selenium.webdriver.chrome.options import Options
 from bs4 import BeautifulSoup
 import time
 import os
+import urllib.parse as urlparse # Added this library to parse the URL
 
 import mysql.connector
 from mysql.connector import Error
 
-if 'DYNO' in os.environ:
-    # We are on Heroku, use Config Vars
-    db_host = os.environ.get('DB_HOST')
-    db_user = os.environ.get('DB_USER')
-    db_pass = os.environ.get('DB_PASSWORD')
-    db_name = os.environ.get('DB_NAME')
-    db_port = os.environ.get('DB_PORT')
+# --- UPDATED CONNECTION LOGIC ---
+if 'JAWSDB_URL' in os.environ:
+    # Parse the URL just like PHP does
+    jawsdb_url = urlparse.urlparse(os.environ.get('JAWSDB_URL'))
+    
+    db_host = jawsdb_url.hostname
+    db_user = jawsdb_url.username
+    db_pass = jawsdb_url.password
+    db_name = jawsdb_url.path[1:] # Removes the leading '/'
+    db_port = jawsdb_url.port or 3306 # Default to 3306 if not specified
 else:
-    # We are on Local machine
+    # Local machine fallback
     db_host = 'localhost'
     db_user = 'root'
     db_pass = ''
     db_name = 'andrei'
     db_port = 3307
+# -------------------------------
 
 
 
