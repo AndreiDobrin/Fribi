@@ -1,9 +1,7 @@
     <?php
         session_start(); //daca se foloseste variabila $_SESSION, este necesara apelarea functiei session_start
         //include 'index1.php';
-        if(!$_SESSION['username']) {
-            header('Location: login.php');
-        }
+
         if(isset($_SESSION['status'])) {
             $status = $_SESSION['status'];
             unset($_SESSION['status']);
@@ -21,6 +19,7 @@
                 if($_SESSION['username']) {
                     echo '<a href="logout.php">Log out</a>';
                     echo "<a>".$_SESSION['username']. "</a>";
+                    echo '<a href="login.php">Log in</a>';
                     echo '<a href="register.php">Register</a>';
                 }
                 else {

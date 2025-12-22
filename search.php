@@ -1,8 +1,12 @@
 <?php
     session_start();
     if(!$_SESSION['username']) {
-    header('Location: login.php');
-}
+        header('Location: login.php');
+    }
+    else if($_SESSION['privilege'] != 'Admin') {
+        header('Location: index.php');
+        echo('bl');
+    }
 
     require_once 'database.php';
         try {
@@ -29,7 +33,6 @@
             if($_SESSION['username']) {
                 echo '<a href="logout.php">Log out</a>';
                 echo "<a>".$_SESSION['username']. "</a>";
-                echo '<a href="register.php">Register</a>';
             }
             else {
                 echo '<a href="login.php">Log in</a>';
@@ -37,7 +40,7 @@
         ?>
         </div>
         <div class="searchform">
-            <form class="form" action="search_submit.php" method="post">
+            <form class="form" action="search_submit.php" method="post"> <!-- de facut cu get -->
                 <!--<input list="table"> -->
                 <select name="table" id="table">
                                 <?php
@@ -81,5 +84,7 @@
             die("❌ Connection failed: " . $e->getMessage());
         }
         ?>
+<?php
 
+?>
 </html>

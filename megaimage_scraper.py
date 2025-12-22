@@ -52,6 +52,7 @@ try:
 
 
         # infinite scroll
+
         last_height = driver.execute_script("return document.body.scrollHeight")
         while True:
             driver.execute_script("window.scrollTo(0, document.body.scrollHeight-2000);")
@@ -64,6 +65,7 @@ try:
 
             last_height = new_height
             print(f"Scrolled to: {new_height}")
+
             
         # salveaza codul html
         html = driver.page_source
@@ -75,24 +77,78 @@ try:
         soup = BeautifulSoup(html, 'html.parser')
 
         items = soup.find_all(attrs={"data-testid": "product-block"})
-
         for item in items:
-
-            name = item.find(attrs={"data-testid": "product-name"}).text.strip() #nume produs
-            brand = item.find(attrs={"data-testid": "product-brand"}).text.strip() #brand produs
-            
             #verificare daca produs deja exista
             ok = 1
             for product in products:
-                if product[4] == name and product[8] == brand:
-                    ok = 0
+                name = item.find(attrs={"data-testid": "product-name"}).text.strip() #nume produs [4]
+                brand = item.find(attrs={"data-testid": "product-brand"}).text.strip() #brand produs [8]
+                if product[4] == name and product[8] == brand: # produsul a fost gasit. se verifica daca detaliile s-au schimbat
+                    print(f"produsul a fost gasit")
+                    '''
+                    price = price_format(item.find(attrs={"data-testid": "product-block-price"}))
+                    if price != product[2]:
+                        ok = 2
+                        break
+                    '''
+                    price = price = price_format(item.find(attrs={"data-testid": "product-block-price"})) #pret produs [2]
+                    
+                    if item.find(attrs={"data-testid":"tag-promo"}): #daca exista butonul cu id de promotie, se insereaza valoarea promotiei si se cauta si pretul vechi
+                        promo = item.find(attrs={"data-testid":"tag-promo"}).text.strip() # [3]
+                    else:
+                        promo = 0 #reducere produs (CONNECT, flat % sau reducere la cumpararea a mai multor produse de acelasi fel)
+                            
+                    product_description = None # [5]
+                    product_ingredients = None # [6]
+                    
+                    image = item.find(attrs={"data-testid": "product-block-image"})
+                    if image:
+                        image_src = image['src']
+                    else:
+                        image_src = None # [7]
+                        
+                    price_per_unit = item.find(attrs={"data-testid": "product-block-price-per-unit"}).text.strip() #pret per kg/l/buc produs
+                    for i in range(0,len(price_per_unit)):
+                        if price_per_unit[i] == ',':
+                            price_per_unit = price_per_unit.replace(',','.') # [9]
+                            break
+                    unit = price_per_unit[price_per_unit.find('/')+1:] #aflare daca e kg sau litru [10]
+                    price_per_unit = price_per_unit[:price_per_unit.find(' ')]
+                    '''
+                    old_price = "" #in caz de promotie, pretul produsului fara reducere
+                    old_ppu = "" #in caz de promotie, pretul produsului per kg/l fara reducere
+                    '''
+                    item_in_list_form = ["id","id_category", price, promo , name, product_description, product_ingredients, image_src, brand, price_per_unit, unit]
+                    print(item_in_list_form[2:])
+                    
+                    if float(product[2]) != float(price) or product[3] != promo or product[4] != name or product[5] != product_description or product[6] != product_ingredients or product[7] != image_src or product[8] != brand or float(product[9]) != float(price_per_unit) or product[10] != unit:
+                        cursor = connection.cursor()
+                        sql = "UPDATE product SET price = %s, offer = %s, product_name = %s, product_description = %s, ingredients = %s, image_src = %s, product_brand = %s, price_per_unit = %s, unit = %s WHERE product_name = %s AND product_brand = %s"
+                        val = (price, promo, name, product_description, product_ingredients, image_src, brand, price_per_unit, unit, name, brand)
+                        print(val)
+                        cursor.execute(sql, val)
+                        connection.commit()
+                        print(f"Articolul {brand} {name} deja exista; au fost modificate detaliile sale...")
+                        ok = -1
+                    else:
+                        ok = 0
                     break
+                
             if ok == 0:
-                print(f"Articolul {brand} {name} deja exista...") # DE VERIFICAT DACA DETALIILE PRODUSULUI S-AU SCHIMBAT
-            else:
-                price_per_unit = item.find(attrs={"data-testid": "product-block-price-per-unit"}).text.strip() #pret per kg/l produs
+                print(f"Articolul {brand} {name} deja exista; NU au fost modificate detaliile sale...") 
+            if ok == 1:
+                print("produsul nu a fost gasit")
+                name = item.find(attrs={"data-testid": "product-name"}).text.strip() #nume produs [4]
+                brand = item.find(attrs={"data-testid": "product-brand"}).text.strip() #brand produs [8]
+                price_per_unit = item.find(attrs={"data-testid": "product-block-price-per-unit"}).text.strip() #pret per kg/l/buc produs
+                for i in range(0,len(price_per_unit)):
+                    if price_per_unit[i] == ',':
+                        price_per_unit = price_per_unit.replace(',','.')
+                        break
+                print(f"PRICE_PER_UNIT: {price_per_unit}")
                 unit = price_per_unit[price_per_unit.find('/')+1:] #aflare daca e kg sau litru
-                price = item.find(attrs={"data-testid": "product-block-price"}) #pret produs
+                price_per_unit = price_per_unit[:price_per_unit.find(' ')]
+                price = price_format(item.find(attrs={"data-testid": "product-block-price"})) #pret produs
                 promo = "0" #reducere produs (CONNECT, flat % sau reducere la cumpararea a mai multor produse de acelasi fel)
                 old_price = "" #in caz de promotie, pretul produsului fara reducere
                 old_ppu = "" #in caz de promotie, pretul produsului per kg/l fara reducere
@@ -102,19 +158,20 @@ try:
 
                 if item.find(attrs={"data-testid":"tag-promo"}): #daca exista butonul cu id de promotie, se insereaza valoarea promotiei si se cauta si pretul vechi
                     promo = item.find(attrs={"data-testid":"tag-promo"}).text.strip()
+                    '''
                     if item.find(attrs={"data-testid": "product-block-old-price"}):
                         old_price = price_format(item.find(attrs={"data-testid": "product-block-old-price"})) # se formateaza cu price_format
                     if item.find(attrs={"data-testid": "product-block-old-ppu"}):
                         old_ppu = (item.find(attrs={"data-testid": "product-block-old-ppu"})).text.strip()
+                    '''
 
-                price = price_format(price) # formatare pret
+
 
                 print(f"{brand} {name}: \n {price} ({price_per_unit})")
                 if promo !="0":
                     print(promo)
                     print(old_price, old_ppu)
                 print(image_src)
-                #DE VAZUT CATEGORIA
                 cursor = connection.cursor()
                 sql = "INSERT INTO product (product_name, product_brand, price, image_src, price_per_unit, unit, offer, id_category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)"
                 val = (name, brand, price, image_src, price_per_unit, unit, promo, 1) #DE VAZUT CATEGORIA
@@ -123,7 +180,7 @@ try:
                 print(f"Record inserted. ID: {cursor.lastrowid}")
                 cursor.close()
                 
-            print("\n\n")
+            print("\n")
 
 
         print(len(items))
