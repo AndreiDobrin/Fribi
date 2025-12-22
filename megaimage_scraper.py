@@ -68,6 +68,7 @@ while True:
             chrome_options.add_argument("--headless") # Runs without a visible UI
             chrome_options.add_argument("--disable-dev-shm-usage") # Overcome limited resource problems
             chrome_options.add_argument("--no-sandbox") # Bypass OS security model
+            chrome_options.add_argument("--window-size=1920,1080")
 
             # selenium
             driver = webdriver.Chrome(options=chrome_options)
