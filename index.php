@@ -1,8 +1,10 @@
 <?php
     session_start();
 
-    if(!$_SESSION['username']) {
+    if(empty($_SESSION['username'])) {
         // header('Location: login.php');
+        $_SESSION['username'] = 'Guest';
+        $_SESSION['privilege'] = 'Guest';
     }
 
 
