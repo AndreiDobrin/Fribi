@@ -87,7 +87,7 @@ while True:
 
             # 4. Initialize the Driver
             driver = webdriver.Chrome(service=service, options=chrome_options)
-
+            #test
             driver.get("https://www.mega-image.ro/Fructe-si-legume-proaspete/c/001")
 
             # javascript load time
