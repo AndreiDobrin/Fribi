@@ -16,6 +16,7 @@ require_once 'database.php';
 <html>
         <head>
         <link rel="stylesheet" href="styles.css">
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script>
         </head>
         <div class="topnav">
             <a class="active" href="index.php">Home</a>
@@ -31,10 +32,18 @@ require_once 'database.php';
             <input type="text" id="email" name="email"><br>
             <label for="parola">Parola:</label><br>
             <input type="text" id="parola" name="parola"><br>
+            <div class="g-recaptcha" data-sitekey="<?php echo getenv('RECAPTCHA_SITE_KEY'); ?>"></div>
             <input type="submit" value="Log in">
         <?php
             if(isset($_POST['email']) && isset($_POST['parola'])) {
-
+                $secret = getenv('RECAPTCHA_SECRET_KEY');
+                        $verifyResponse = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secret.'&response='.$_POST['g-recaptcha-response']);
+                        $responseData = json_decode($verifyResponse);
+                        
+                        if(!$responseData->success) {
+                            echo "<h3>Please complete the CAPTCHA validation.</h3>";
+                        }
+                        else {
                     try {
             $pdo = Database::getInstance()->getConnection();
             $sql = "SELECT email,parola FROM user WHERE email = ?";
@@ -65,6 +74,7 @@ require_once 'database.php';
             die("❌ Connection failed: " . $e->getMessage());
         }
         }
+    }
         ?>
         </form>
         <button onclick="location.href='register.php'">Register</button>

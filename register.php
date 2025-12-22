@@ -10,6 +10,7 @@
     <!DOCTYPE HTML>
     <head>
         <link rel="stylesheet" href="styles.css">
+        <script src="https://www.google.com/recaptcha/api.js" async defer></script> </head>
     </head>
     <body>
         <div class="topnav">
@@ -36,6 +37,7 @@
             <input type="text" id="email" name="email"><br>
             <label for="parola">Parola:</label><br>
             <input type="text" id="parola" name="parola"><br>
+            <div class="g-recaptcha" data-sitekey="<?php echo getenv('RECAPTCHA_SITE_KEY'); ?>"></div>
             <input type="submit" value="Register">
 
         <?php

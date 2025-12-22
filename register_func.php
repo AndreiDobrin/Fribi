@@ -11,6 +11,17 @@
         }
 
         if(isset($_POST['email']) && isset($_POST['nume']) && isset($_POST['prenume']))  {
+            $secret = getenv('RECAPTCHA_SECRET_KEY');
+
+            $captcha_response = $_POST['g-recaptcha-response'] ?? '';
+    
+            $verifyResponse = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secret.'&response='.$_POST['g-recaptcha-response']);            $responseData = json_decode($verifyResponse);
+            
+            if(!$responseData->success) {
+                $_SESSION['status'] = "Please verify you are not a robot.";
+                header("Location: register.php");
+                exit;
+            }
             $email = $_POST['email'];
 
         try {
