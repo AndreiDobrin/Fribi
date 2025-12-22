@@ -77,20 +77,11 @@ while True:
             chrome_options.add_argument("--no-sandbox") 
             chrome_options.add_argument("--window-size=1920,1080")
 
-            # 2. Tell Selenium where Chrome is installed on Heroku
-            # Heroku sets this variable automatically if the buildpack is correct
-            chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+            # 2. Initialize Driver (Selenium will find Chrome on the PATH automatically)
+            driver = webdriver.Chrome(options=chrome_options)
 
-            # 3. Tell Selenium where the Driver is
-            # We use the Service object for this in newer Selenium versions
-            service = Service(executable_path=os.environ.get("CHROMEDRIVER_PATH"))
-
-            # 4. Initialize the Driver
-            driver = webdriver.Chrome(service=service, options=chrome_options)
-            #test1
             driver.get("https://www.mega-image.ro/Fructe-si-legume-proaspete/c/001")
-
-            # javascript load time
+                        # javascript load time
             time.sleep(2) 
 
 
