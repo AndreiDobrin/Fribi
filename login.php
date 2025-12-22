@@ -62,6 +62,8 @@ require_once 'database.php';
                     $results = $stmt->fetch(PDO::FETCH_ASSOC);
                     if($results['privilege'] == 'Admin')
                         $_SESSION['privilege'] = 'Admin';
+                    else
+                        $_SESSION['privilege'] = 'User';
                 header('Location: index.php');
             }
             else {

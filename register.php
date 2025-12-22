@@ -17,14 +17,12 @@
             <a class="active" href="index.php">Home</a>
             <a href="search.php">Search</a>
             <?php
-                if($_SESSION['username']) {
-                    echo '<a href="logout.php">Log out</a>';
-                    echo "<a>".$_SESSION['username']. "</a>";
-                    echo '<a href="login.php">Log in</a>';
-                    echo '<a href="register.php">Register</a>';
+                if($_SESSION['username']!='Guest') {
+                    header('Location: index.php');
                 }
                 else {
                     echo '<a href="login.php">Log in</a>';
+                    echo '<a href="register.php">Register</a>';
                 }
             ?>
         </div>
