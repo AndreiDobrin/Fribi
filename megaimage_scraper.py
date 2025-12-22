@@ -1,5 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 from bs4 import BeautifulSoup
 import time
 import os
@@ -69,14 +70,24 @@ while True:
                 return price
 
 
+            # 1. Define Options
             chrome_options = Options()
-            chrome_options.add_argument("--headless") # Runs without a visible UI
-            chrome_options.add_argument("--disable-dev-shm-usage") # Overcome limited resource problems
-            chrome_options.add_argument("--no-sandbox") # Bypass OS security model
+            chrome_options.add_argument("--headless") 
+            chrome_options.add_argument("--disable-dev-shm-usage") 
+            chrome_options.add_argument("--no-sandbox") 
             chrome_options.add_argument("--window-size=1920,1080")
 
-            # selenium
-            driver = webdriver.Chrome(options=chrome_options)
+            # 2. Tell Selenium where Chrome is installed on Heroku
+            # Heroku sets this variable automatically if the buildpack is correct
+            chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+
+            # 3. Tell Selenium where the Driver is
+            # We use the Service object for this in newer Selenium versions
+            service = Service(executable_path=os.environ.get("CHROMEDRIVER_PATH"))
+
+            # 4. Initialize the Driver
+            driver = webdriver.Chrome(service=service, options=chrome_options)
+
             driver.get("https://www.mega-image.ro/Fructe-si-legume-proaspete/c/001")
 
             # javascript load time
