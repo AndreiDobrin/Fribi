@@ -9,6 +9,7 @@ from bs4 import BeautifulSoup
 import time
 import os
 import urllib.parse as urlparse # Added this library to parse the URL
+import gc
 
 import mysql.connector
 from mysql.connector import Error
@@ -21,8 +22,8 @@ if 'JAWSDB_URL' in os.environ:
     db_host = jawsdb_url.hostname
     db_user = jawsdb_url.username
     db_pass = jawsdb_url.password
-    db_name = jawsdb_url.path[1:] # Removes the leading '/'
-    db_port = jawsdb_url.port or 3306 # Default to 3306 if not specified
+    db_name = jawsdb_url.path[1:]
+    db_port = jawsdb_url.port or 3306
     time_sleep = 24*3600
 else:
     # Local machine fallback
@@ -59,10 +60,14 @@ while True:
             # PRODUCTS FETCH
             cursor = connection.cursor()
             cursor.execute("SELECT * FROM product")
-            products = cursor.fetchall()
+            db_cache = {}
+            for row in cursor:
+                key = (row[4], row[8])
+                db_cache[key] = row
+
             cursor.close()
-
-
+            print(f"Loaded {len(db_cache)} products into cache.")
+            
             def price_format(price): # formatare pret din "Pret: 11 lei si 99 bani" in "11.99". Este un format ciudatel la html pt pret si am ales metoda asta pentru scraping eficient
                 string = price['aria-label'].upper()
                 alphabet = [x for x in range(ord('A'), ord('Z')+1)]
@@ -86,24 +91,26 @@ while True:
             chrome_options.add_argument("--window-size=1920,1080")
             chrome_options.add_argument("--disable-gpu")
             
-                    # BLOCK IMAGES & CSS
+            # BLOCK IMAGES & CSS
             prefs = {
                 "profile.managed_default_content_settings.images": 2, 
                 "profile.managed_default_content_settings.stylesheets": 2,
                 "profile.managed_default_content_settings.fonts": 2
             }
             chrome_options.add_experimental_option("prefs", prefs)
-
-            driver = webdriver.Chrome(options=chrome_options)
-            wait = WebDriverWait(driver, 10)
-            driver.get("https://www.mega-image.ro")
-            try:
-                reject_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-testid="cookie-popup-reject"]')))
-                reject_button.click()
-            except Exception:
-                print("Cookie reject button not found")
+            
+            # driver.get("https://www.mega-image.ro")
+            
             id_category = 1
+            
             for category_link in links:
+                driver = webdriver.Chrome(options=chrome_options)
+                wait = WebDriverWait(driver, 10)
+                try:
+                    reject_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-testid="cookie-popup-reject"]')))
+                    reject_button.click()
+                except:
+                    pass
                 # id categorie
                 driver.get(category_link)
                 
@@ -125,7 +132,7 @@ while True:
 
                     if new_height == last_height:
                         try:
-                            wait.until(
+                            WebDriverWait(1, driver).until(
                                         EC.any_of(
                                             EC.staleness_of(element),
                                             EC.invisibility_of_element_located((By.CSS_SELECTOR, 'div[data-testid="loading-spinner-animation"]'))
@@ -145,19 +152,22 @@ while True:
 
                 # salveaza codul html
                 html = driver.page_source
-
-                # inchide selenium
-                # driver.quit()
-
-                # parser
+                driver.quit()
                 soup = BeautifulSoup(html, 'html.parser')
+                del html
+                gc.collect()
 
                 items = soup.find_all(attrs={"data-testid": "product-block"})
+                
                 # fiecare produs gasit PE SITE
                 for item in items:
-                    
-                    ok = 1 # verificare daca produs deja exista
-                    
+                    driver = webdriver.Chrome(options=chrome_options)
+                    wait = WebDriverWait(driver, 10)
+                    try:
+                        reject_button = wait.until(EC.element_to_be_clickable((By.CSS_SELECTOR, '[data-testid="cookie-popup-reject"]')))
+                        reject_button.click()
+                    except:
+                        pass
                     link = item.find(attrs={"data-testid": "product-block-image-link"})['href']
                     print(link)
                     driver.get("https://www.mega-image.ro" + link)
@@ -230,97 +240,45 @@ while True:
                     except Exception as e:
                         price_per_unit = None
                         print(f"Price per unit not found... Product:\n{brand} {name}\n{link}\n\033[31m\033[44m{e}\033[0m\n")
-                                        
-                    # fiecare produs din BAZA DE DATE
-                    # DE FACUT QUERY PER CATEGORIE PENTRU EFICIENTA
-                    for product in products:
-
-                        if product[4] == name and product[8] == brand: # produsul a fost gasit. se verifica daca detaliile s-au schimbat
-                            print(f"produsul a fost gasit")
-                            '''
-                            price = price_format(item.find(attrs={"data-testid": "product-block-price"}))
-                            if price != product[2]:
-                                ok = 2
-                                break
-                            '''
-
-
-                            '''
-                            old_price = "" #in caz de promotie, pretul produsului fara reducere
-                            old_ppu = "" #in caz de promotie, pretul produsului per kg/l fara reducere
-                            '''
-                            item_in_list_form = ["id", id_category, price, offer , name, description, ingredients, image_src, brand, price_per_unit, unit]
-                            print(item_in_list_form[1:])
-
-                            if float(product[2]) != float(price) or product[3] != offer or product[4] != name or product[5] != description or product[6] != ingredients or product[7] != image_src or product[8] != brand or float(product[9]) != float(price_per_unit) or product[10] != unit:
-                                
-                                if float(product[2]) != float(price):
-                                    print(f"Pretul difera: {float(product[2])} vs {float(price)}")
-                                if product[3] != offer:
-                                    print(f"Promotia difera: {product[3]} vs {offer}")
-                                if product[4] != name:
-                                    print(f"Numele difera: {product[4]} vs {name}")
-                                if product[5] != description:
-                                    print(f"Descrierea difera: {product[5]} vs {description}")
-                                if product[6] != ingredients:
-                                    print(f"Ingredientele difera: {product[6]} vs {ingredients}")
-                                if product[7] != image_src:
-                                    print(f"Sursa imaginii difera: {product[7]} vs {image_src}")
-                                if product[8] != brand:
-                                    print(f"Brand-ul difera: {product[8]} vs {brand}")
-                                if float(product[9]) != float(price_per_unit):
-                                    print(f"PPU difera: {float(product[9])} vs {float(price_per_unit)}")
-                                if product[10] != unit:
-                                    print(f"Unitatea difera: {product[10]} vs {unit}")
-
-                                cursor = connection.cursor()
-                                sql = "UPDATE product SET price = %s, offer = %s, product_name = %s, product_description = %s, ingredients = %s, image_src = %s, product_brand = %s, price_per_unit = %s, unit = %s WHERE id_category = %s AND product_name = %s AND product_brand = %s"
-                                val = (price, offer, name, description, ingredients, image_src, brand, price_per_unit, unit, id_category, name, brand)
-                                print(val)
-                                cursor.execute(sql, val)
-                                connection.commit()
-                                print(f"Articolul {brand} {name} deja exista; au fost modificate detaliile sale...")
-                                ok = -1
-                            else:
-                                ok = 0
-                            break
+                    if (name, brand) in db_cache:
+                        print("Article found")
                         
-                    if ok == 0:
-                        print(f"Articolul {brand} {name} deja exista; NU au fost modificate detaliile sale...") 
-                    if ok == 1:
-                        print("produsul nu a fost gasit")
-                        '''
-                        name = item.find(attrs={"data-testid": "product-name"}).text.strip() #nume produs [4]
-                        brand = item.find(attrs={"data-testid": "product-brand"}).text.strip() #brand produs [8]
-                        price_per_unit = item.find(attrs={"data-testid": "product-block-price-per-unit"}).text.strip() #pret per kg/l/buc produs
-                        for id_category in range(0,len(price_per_unit)):
-                            if price_per_unit[id_category] == ',':
-                                price_per_unit = price_per_unit.replace(',','.')
-                                break
-                        print(f"PRICE_PER_UNIT: {price_per_unit}")
-                        unit = price_per_unit[price_per_unit.find('/')+1:] #aflare daca e kg sau litru
-                        price_per_unit = price_per_unit[:price_per_unit.find(' ')]
-                        price = price_format(item.find(attrs={"data-testid": "product-block-price"})) #pret produs
-                        offer = "0" #reducere produs (CONNECT, flat % sau reducere la cumpararea a mai multor produse de acelasi fel)
-                        old_price = "" #in caz de promotie, pretul produsului fara reducere
-                        old_ppu = "" #in caz de promotie, pretul produsului per kg/l fara reducere
-                        image = item.find(attrs={"data-testid": "product-block-image"})
-                        if image:
-                            image_src = image['src']
-                        if item.find(attrs={"data-testid":"tag-offer"}): #daca exista butonul cu id de promotie, se insereaza valoarea promotiei si se cauta si pretul vechi
-                            offer = item.find(attrs={"data-testid":"tag-offer"}).text.strip()
-                            if item.find(attrs={"data-testid": "product-block-old-price"}):
-                                old_price = price_format(item.find(attrs={"data-testid": "product-block-old-price"})) # se formateaza cu price_format
-                            if item.find(attrs={"data-testid": "product-block-old-ppu"}):
-                                old_ppu = (item.find(attrs={"data-testid": "product-block-old-ppu"})).text.strip()
-                            '''
+                        item_in_list_form = ["id", id_category, price, offer , name, description, ingredients, image_src, brand, price_per_unit, unit]
+                        print(item_in_list_form[1:])
+                        #product = db_cache[(name,brand)]
+                        #key = (brand, name)
+                        if float(db_cache[(name,brand)][2]) != float(price) or db_cache[(name,brand)][3] != offer or db_cache[(name,brand)][4] != name or db_cache[(name,brand)][5] != description or db_cache[(name,brand)][6] != ingredients or db_cache[(name,brand)][7] != image_src or db_cache[(name,brand)][8] != brand or float(db_cache[(name,brand)][9]) != float(price_per_unit) or db_cache[(name,brand)][10] != unit:
+                            ok = 0
+                            if float(db_cache[(name,brand)][2]) != float(price):
+                                print(f"Pretul difera: {float(db_cache[(name,brand)][2])} vs {float(price)}")
+                            if db_cache[(name,brand)][3] != offer:
+                                print(f"Promotia difera: {db_cache[(name,brand)][3]} vs {offer}")
+                            if db_cache[(name,brand)][4] != name:
+                                print(f"Numele difera: {db_cache[(name,brand)][4]} vs {name}")
+                            if db_cache[(name,brand)][5] != description:
+                                print(f"Descrierea difera: {db_cache[(name,brand)][5]} vs {description}")
+                            if db_cache[(name,brand)][6] != ingredients:
+                                print(f"Ingredientele difera: {db_cache[(name,brand)][6]} vs {ingredients}")
+                            if db_cache[(name,brand)][7] != image_src:
+                                print(f"Sursa imaginii difera: {db_cache[(name,brand)][7]} vs {image_src}")
+                            if db_cache[(name,brand)][8] != brand:
+                                print(f"Brand-ul difera: {db_cache[(name,brand)][8]} vs {brand}")
+                            if float(db_cache[(name,brand)][9]) != float(price_per_unit):
+                                print(f"PPU difera: {float(db_cache[(name,brand)][9])} vs {float(price_per_unit)}")
+                            if db_cache[(name,brand)][10] != unit:
+                                print(f"Unitatea difera: {db_cache[(name,brand)][10]} vs {unit}")
+                            cursor = connection.cursor()
+                            sql = "UPDATE product SET price = %s, offer = %s, product_name = %s, product_description = %s, ingredients = %s, image_src = %s, product_brand = %s, price_per_unit = %s, unit = %s WHERE id_category = %s AND product_name = %s AND product_brand = %s"
+                            val = (price, offer, name, description, ingredients, image_src, brand, price_per_unit, unit, id_category, name, brand)
+                            print(val)
+                            cursor.execute(sql, val)
+                            connection.commit()
+                            print(f"Article {brand} {name} already in DB; details have been modified...")
+                        else:
+                            print(f"Article {brand} {name} already in DB; details have NOT been modified...") 
+                    else:
+                        print("Article not found")
                         print(f"{brand} {name}: \n {price} ({price_per_unit})")
-                        '''
-                        if offer !="0":
-                            print(offer)
-                            print(old_price, old_ppu)
-                        print(image_src)
-                        '''
                         cursor = connection.cursor()
                         sql = "INSERT INTO product (product_name, product_description, ingredients, product_brand, price, image_src, price_per_unit, unit, offer, id_category, active) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
                         val = (name, description, ingredients, brand, price, image_src, price_per_unit, unit, offer, id_category, 1)
@@ -330,6 +288,8 @@ while True:
                         cursor.close()
                         
                     print("\n")
+                    driver.quit()
+                    
                 print(len(items))
                 id_category += 1 # contorizare id categorie
 
