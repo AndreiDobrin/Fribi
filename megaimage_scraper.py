@@ -64,6 +64,7 @@ while True:
             for row in cursor:
                 key = (row[4], row[8])
                 db_cache[key] = row
+            print(db_cache)
 
             cursor.close()
             print(f"Loaded {len(db_cache)} products into cache.")
@@ -132,7 +133,7 @@ while True:
 
                     if new_height == last_height:
                         try:
-                            WebDriverWait(1, driver).until(
+                            WebDriverWait(3, driver).until(
                                         EC.any_of(
                                             EC.staleness_of(element),
                                             EC.invisibility_of_element_located((By.CSS_SELECTOR, 'div[data-testid="loading-spinner-animation"]'))
@@ -240,6 +241,7 @@ while True:
                     except Exception:
                         price_per_unit = None
                         print(f"Price per unit not found... Product:\n{brand} {name}\n{link}\n")
+                        print(db_cache)
                     if (name, brand) in db_cache:
                         print("Article found")
                         
