@@ -36,14 +36,29 @@ require_once 'database.php';
             <input type="submit" value="Log in">
         <?php
             if(isset($_POST['email']) && isset($_POST['parola'])) {
+                $whitelist = ['127.0.0.1', '::1', 'localhost'];
+                $isLocal = in_array($_SERVER['REMOTE_ADDR'], $whitelist) || $_SERVER['SERVER_NAME'] === 'localhost';
+
+                
+                $captchaSuccess = false;
+
+                if ($isLocal) {
+                    // AUTOMATICALLY PASS if local
+                    $captchaSuccess = true; 
+                } else {
                 $secret = getenv('RECAPTCHA_SECRET_KEY');
                         $verifyResponse = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secret.'&response='.$_POST['g-recaptcha-response']);
                         $responseData = json_decode($verifyResponse);
-                        
-                        if(!$responseData->success) {
+                        if ($responseData->success) {
+                            $captchaSuccess = true;
+                        }
+                    }
+                        if(!$captchaSuccess) {
                             echo "<h3>Please complete the CAPTCHA validation.</h3>";
                         }
                         else {
+                        
+                
                     try {
             $pdo = Database::getInstance()->getConnection();
             $sql = "SELECT email,parola FROM user WHERE email = ?";
@@ -68,7 +83,7 @@ require_once 'database.php';
             }
             else {
                 <<<HTML
-                    <h3> Parola gresita </h3>
+                    <h3> CREDENTIALE INVALIDE </h3>
                 HTML;
             }
             //echo "<script type='text/javascript'>alert($results[email]);</script>";

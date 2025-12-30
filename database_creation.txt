@@ -36,6 +36,7 @@
         ingredients VARCHAR(200),
         PRIMARY KEY(id),
         FOREIGN KEY(id_category) REFERENCES category(id)
+        active BOOL
     );
 
     CREATE TABLE cart_products (

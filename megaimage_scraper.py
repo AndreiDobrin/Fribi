@@ -65,13 +65,13 @@ while True:
 
             def price_format(price): # formatare pret din "Pret: 11 lei si 99 bani" in "11.99". Este un format ciudatel la html pt pret si am ales metoda asta pentru scraping eficient
                 string = price['aria-label'].upper()
-                alphabet = [id_category for id_category in range(ord('A'), ord('Z')+1)]
+                alphabet = [x for x in range(ord('A'), ord('Z')+1)]
                 string = string.split()
 
                 copy = []
-                for id_category in range(0,len(string)):
-                    if ord(string[id_category][0]) not in alphabet:
-                        copy.append(string[id_category])
+                for x in range(0,len(string)):
+                    if ord(string[x][0]) not in alphabet:
+                        copy.append(string[x])
                 price = '.'.join(copy)
                 return price
 
@@ -93,8 +93,9 @@ while True:
                 reject_button.click()
             except Exception:
                 print("Cookie reject button not found")
+            id_category = 1
             for category_link in links:
-                id_category = 1 # id categorie
+                # id categorie
                 driver.get(category_link)
                 
                 # INFINITE SCROLL
@@ -152,7 +153,11 @@ while True:
                     print(link)
                     driver.get("https://www.mega-image.ro" + link)
                     
-                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".sc-e3oax-36.gArZOi"))) # in loc de time.sleep(), asteapta pana apare in DOM elementul cu descrierea, pentru a fi mai rapid
+                    try:
+                        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-testid="product-common-header-title"]'))) # in loc de time.sleep(), asteapta pana apare in DOM elementul cu titlu, pentru a fi mai rapid
+                    except Exception as e:
+                        print(e)
+                    
 
                     item_html = driver.page_source
                     item_soup = BeautifulSoup(item_html, 'html.parser')
@@ -185,7 +190,7 @@ while True:
                     # INGREDIENTE PRODUS [6] INGREDIENTS
                     try:
                         # wait for ingredients section (nu toate produsele au)
-                        wait.until(
+                        WebDriverWait(driver, 1).until(
                             EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-testid="accordion-item-ingredients"] > div.sc-45z6bh-1.kTTCfu > div.sc-14mbxjb-0.hDQks'))
                         )
                         ingredients = item_soup.select('div[data-testid="accordion-item-ingredients"] > div.sc-45z6bh-1.kTTCfu > div.sc-14mbxjb-0.hDQks')[0].text.strip()
@@ -206,8 +211,8 @@ while True:
                     # UNIT (KG/L/BUC) [10] UNIT
                     try:
                         price_per_unit = item.find(attrs={"data-testid": "product-block-price-per-unit"}).text.strip() #pret per kg/l/buc produs
-                        for id_category in range(0,len(price_per_unit)):
-                            if price_per_unit[id_category] == ',':
+                        for x in range(0,len(price_per_unit)):
+                            if price_per_unit[x] == ',':
                                 price_per_unit = price_per_unit.replace(',','.') # [9]
                                 break
                         
@@ -216,8 +221,6 @@ while True:
                     except Exception as e:
                         price_per_unit = None
                         print(f"Price per unit not found... Product:\n{brand} {name}\n{link}\n\033[31m\033[44m{e}\033[0m\n")
-                        
-                    category_id = id_category
                                         
                     # fiecare produs din BAZA DE DATE
                     # DE FACUT QUERY PER CATEGORIE PENTRU EFICIENTA
@@ -310,8 +313,8 @@ while True:
                         print(image_src)
                         '''
                         cursor = connection.cursor()
-                        sql = "INSERT INTO product (product_name, product_description, ingredients, product_brand, price, image_src, price_per_unit, unit, offer, id_category) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-                        val = (name, description, ingredients, brand, price, image_src, price_per_unit, unit, offer, id_category)
+                        sql = "INSERT INTO product (product_name, product_description, ingredients, product_brand, price, image_src, price_per_unit, unit, offer, id_category, active) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+                        val = (name, description, ingredients, brand, price, image_src, price_per_unit, unit, offer, id_category, 1)
                         cursor.execute(sql, val)
                         connection.commit()
                         print(f"Record inserted. ID: {cursor.lastrowid}")
