@@ -241,7 +241,8 @@ while True:
                     except Exception:
                         price_per_unit = None
                         print(f"Price per unit not found... Product:\n{brand} {name}\n{link}\n")
-                        print(db_cache)
+                        
+                    print(db_cache[(name,brand)])
                     if (name, brand) in db_cache:
                         print("Article found")
                         
