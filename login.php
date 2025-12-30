@@ -46,12 +46,12 @@ require_once 'database.php';
                     // AUTOMATICALLY PASS if local
                     $captchaSuccess = true; 
                 } else {
-                $secret = getenv('RECAPTCHA_SECRET_KEY');
-                        $verifyResponse = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secret.'&response='.$_POST['g-recaptcha-response']);
-                        $responseData = json_decode($verifyResponse);
-                        if ($responseData->success) {
-                            $captchaSuccess = true;
-                        }
+                    $secret = getenv('RECAPTCHA_SECRET_KEY');
+                    $verifyResponse = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secret.'&response='.$_POST['g-recaptcha-response']);
+                    $responseData = json_decode($verifyResponse);
+                    if ($responseData->success) {
+                        $captchaSuccess = true;
+                    }
                     }
                         if(!$captchaSuccess) {
                             echo "<h3>Please complete the CAPTCHA validation.</h3>";
@@ -59,37 +59,37 @@ require_once 'database.php';
                         else {
                         
                 
-                    try {
-            $pdo = Database::getInstance()->getConnection();
-            $sql = "SELECT email,parola FROM user WHERE email = ?";
-            $stmt = $pdo->prepare($sql);
-
-            $email = $_POST['email'];
-            $stmt->execute([$email]);
-            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-                echo $results[0]['parola'];
-            $inputted_password = $_POST['parola'];
-            if($inputted_password == $results[0]['parola']) {
-                $_SESSION['username'] = $results[0]['email'];
-                    $sql = "SELECT privilege FROM user WHERE email = ?";
-                    $stmt = $pdo->prepare($sql);
-                    $stmt->execute([$email]);
-                    $results = $stmt->fetch(PDO::FETCH_ASSOC);
-                    if($results['privilege'] == 'Admin')
-                        $_SESSION['privilege'] = 'Admin';
-                    else
-                        $_SESSION['privilege'] = 'User';
-                header('Location: index.php');
-            }
-            else {
-                <<<HTML
-                    <h3> CREDENTIALE INVALIDE </h3>
-                HTML;
-            }
-            //echo "<script type='text/javascript'>alert($results[email]);</script>";
-        } catch (PDOException $e) {
-            die("❌ Connection failed: " . $e->getMessage());
-        }
+                            try {
+                                $pdo = Database::getInstance()->getConnection();
+                                $sql = "SELECT email,parola FROM user WHERE email = ?";
+                                $stmt = $pdo->prepare($sql);
+                                        
+                                $email = $_POST['email'];
+                                $stmt->execute([$email]);
+                                $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                                    echo $results[0]['parola'];
+                                $inputted_password = $_POST['parola'];
+                                if($inputted_password == $results[0]['parola']) {
+                                    $_SESSION['username'] = $results[0]['email'];
+                                        $sql = "SELECT privilege FROM user WHERE email = ?";
+                                        $stmt = $pdo->prepare($sql);
+                                        $stmt->execute([$email]);
+                                        $results = $stmt->fetch(PDO::FETCH_ASSOC);
+                                        if($results['privilege'] == 'Admin')
+                                            $_SESSION['privilege'] = 'Admin';
+                                        else
+                                            $_SESSION['privilege'] = 'User';
+                                    header('Location: index.php');
+                                }
+                                else {
+                                    <<<HTML
+                                        <h3> CREDENTIALE INVALIDE </h3>
+                                    HTML;
+                                }
+                                //echo "<script type='text/javascript'>alert($results[email]);</script>";
+                            } catch (PDOException $e) {
+                            die("❌ Connection failed: " . $e->getMessage());
+                        }
         }
     }
         ?>

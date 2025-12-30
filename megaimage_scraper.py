@@ -191,7 +191,7 @@ while True:
                         price = price = price_format(item.find(attrs={"data-testid": "product-block-price"}))
                     except Exception as e:
                         price = None
-                        print(f"Price not found... Product:\n{brand} {name}\n{link}\n\033[31m\033[44m{e}\033[0m\n")
+                        print(f"Price not found... Product:\n{brand} {name}\n{link}\n")
                     # offer PRODUS [3] OFFER
                     try:
                         offer = item_soup.select('div[data-testid="tag-label"]')[0].text.strip() #reducere produs (CONNECT, flat % sau reducere la cumpararea a mai multor produse de acelasi fel)
@@ -214,16 +214,16 @@ while True:
                         )
                         ingredients = item_soup.select('div[data-testid="accordion-item-ingredients"] > div.sc-45z6bh-1.kTTCfu > div.sc-14mbxjb-0.hDQks')[0].text.strip()
                         print(ingredients)
-                    except Exception as e:
+                    except Exception:
                         ingredients = None
                         print(f"Ingredients section not found... Product:\n{brand} {name}\n{link}\n")
                         
                     # IMAGINE PRODUS [7] IMAGE_SRC
                     try:
                         image_src = item.find(attrs={"data-testid": "product-block-image"})['src']
-                    except Exception as e:
+                    except Exception:
                         image_src = None
-                        print(f"Image source not found... Product:\n{brand} {name}\n{link}\n\033[31m\033[44m{e}\033[0m\n")
+                        print(f"Image source not found... Product:\n{brand} {name}\n{link}\n")
                     
                         
                     # PRICE_PER_UNIT [9] PRICE_PER_UNIT
@@ -237,9 +237,9 @@ while True:
                         
                         unit = price_per_unit[price_per_unit.find('/')+1:] #aflare daca e kg sau litru [10]
                         price_per_unit = price_per_unit[:price_per_unit.find(' ')]
-                    except Exception as e:
+                    except Exception:
                         price_per_unit = None
-                        print(f"Price per unit not found... Product:\n{brand} {name}\n{link}\n\033[31m\033[44m{e}\033[0m\n")
+                        print(f"Price per unit not found... Product:\n{brand} {name}\n{link}\n")
                     if (name, brand) in db_cache:
                         print("Article found")
                         
