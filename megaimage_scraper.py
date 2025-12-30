@@ -62,7 +62,7 @@ while True:
             cursor.execute("SELECT * FROM product")
             db_cache = {}
             for row in cursor:
-                key = (row[4], row[8])
+                key = (row[6], row[7])
                 db_cache[key] = row
             print(db_cache)
 
@@ -133,7 +133,7 @@ while True:
 
                     if new_height == last_height:
                         try:
-                            WebDriverWait(3, driver).until(
+                            WebDriverWait(driver, 3).until(
                                         EC.any_of(
                                             EC.staleness_of(element),
                                             EC.invisibility_of_element_located((By.CSS_SELECTOR, 'div[data-testid="loading-spinner-animation"]'))
@@ -143,8 +143,9 @@ while True:
                             break
                         except TimeoutException:
                             print("elementul inca exista")
-                        except:
+                        except Exception as e:
                             print("da?")
+                            print(e)
                             break
 
                     last_height = new_height
@@ -174,61 +175,77 @@ while True:
                     driver.get("https://www.mega-image.ro" + link)
                     
                     try:
-                        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-testid="product-common-header-title"]'))) # in loc de time.sleep(), asteapta pana apare in DOM elementul cu titlu, pentru a fi mai rapid
-                    except Exception as e:
-                        print(e)
+                        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, '[data-testid="product-common-header-title"]'))) # in loc de time.sleep(), asteapta pana apare in DOM elementul cu titlu, pentru a fi mai rapid
+                    except Exception:
+                        print("Product Title could not be fetched...")
+                        
+                    try:
+                        wait.until(EC.presence_of_element_located((By.CSS_SELECTOR,'.sc-e3oax-36')))
+                    except Exception:
+                        print("Description could not be fetched...")
+                    
+                    try:
+                        # wait for ingredients section (nu toate produsele au)
+                        WebDriverWait(driver, 5).until(
+                            EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-testid="accordion-item-ingredients"] > div.sc-45z6bh-1.kTTCfu > div.sc-14mbxjb-0.hDQks'))
+                        )
+                    except Exception:
+                        print(f"Ingredients section not found... Product:\n{link}\n")
                     
 
                     item_html = driver.page_source
+                    driver.quit()
                     item_soup = BeautifulSoup(item_html, 'html.parser')
                     
-                    # NUME PRODUS [4] PRODUCT_NAME
-                    name = item.find(attrs={"data-testid": "product-name"}).text.strip()
-                    # BRAND PRODUS [8] PRODUCT_BRAND
-                    brand = item.find(attrs={"data-testid": "product-brand"}).text.strip()
+                    # NUME PRODUS [7] PRODUCT_NAME
+                    try:
+                        name = item.find(attrs={"data-testid": "product-name"}).text.strip()
+                    except Exception:
+                        print(f"Name could not be fetched... Product:\n{link}\n")
                         
+                    # BRAND PRODUS [6] PRODUCT_BRAND
+                    try:
+                        brand = item.find(attrs={"data-testid": "product-brand"}).text.strip()
+                    except Exception:
+                        print(f"Brand could not be fetched... Product:\n{link}\n")    
                     # PRET PRODUS [2] PRICE
                     try:
                         price = price = price_format(item.find(attrs={"data-testid": "product-block-price"}))
                     except Exception as e:
                         price = None
-                        print(f"Price not found... Product:\n{brand} {name}\n{link}\n")
+                        print(f"Price not found... Product:\n{link}\n")
                     # offer PRODUS [3] OFFER
                     try:
                         offer = item_soup.select('div[data-testid="tag-label"]')[0].text.strip() #reducere produs (CONNECT, flat % sau reducere la cumpararea a mai multor produse de acelasi fel)
                         print(offer) 
-                    except Exception as e:
+                    except Exception:
                         offer = None
                     
-                    # DESCRIERE PRODUS [5] description
+                    # DESCRIERE PRODUS [8] description
                     try:
                         description = item_soup.find(class_ = "sc-e3oax-36").text.strip()
                         print(description)
-                    except Exception as e:
+                    except Exception:
                         description = None
-                        print(f"Description section not found...  Product:\n{brand} {name}\n{link}\n")
-                    # INGREDIENTE PRODUS [6] INGREDIENTS
+                        print(f"Description section not found...  Product:\n{link}\n")
+                        
+                    # INGREDIENTE PRODUS [10] INGREDIENTS
                     try:
-                        # wait for ingredients section (nu toate produsele au)
-                        WebDriverWait(driver, 1).until(
-                            EC.presence_of_element_located((By.CSS_SELECTOR, 'div[data-testid="accordion-item-ingredients"] > div.sc-45z6bh-1.kTTCfu > div.sc-14mbxjb-0.hDQks'))
-                        )
                         ingredients = item_soup.select('div[data-testid="accordion-item-ingredients"] > div.sc-45z6bh-1.kTTCfu > div.sc-14mbxjb-0.hDQks')[0].text.strip()
-                        print(ingredients)
                     except Exception:
                         ingredients = None
-                        print(f"Ingredients section not found... Product:\n{brand} {name}\n{link}\n")
+                        print(f"Ingredients section not found... Product:\n{link}\n")
                         
-                    # IMAGINE PRODUS [7] IMAGE_SRC
+                    # IMAGINE PRODUS [9] IMAGE_SRC
                     try:
                         image_src = item.find(attrs={"data-testid": "product-block-image"})['src']
                     except Exception:
                         image_src = None
-                        print(f"Image source not found... Product:\n{brand} {name}\n{link}\n")
+                        print(f"Image source not found... Product:\n{link}\n")
                     
                         
-                    # PRICE_PER_UNIT [9] PRICE_PER_UNIT
-                    # UNIT (KG/L/BUC) [10] UNIT
+                    # PRICE_PER_UNIT [3] PRICE_PER_UNIT
+                    # UNIT (KG/L/BUC) [5] UNIT
                     try:
                         price_per_unit = item.find(attrs={"data-testid": "product-block-price-per-unit"}).text.strip() #pret per kg/l/buc produs
                         for x in range(0,len(price_per_unit)):
@@ -240,36 +257,31 @@ while True:
                         price_per_unit = price_per_unit[:price_per_unit.find(' ')]
                     except Exception:
                         price_per_unit = None
-                        print(f"Price per unit not found... Product:\n{brand} {name}\n{link}\n")
-                        
-                    print(db_cache[(name,brand)])
+                        print(f"Price per unit not found... Product:\n{link}\n")
+                    
                     if (name, brand) in db_cache:
                         print("Article found")
-                        
-                        item_in_list_form = ["id", id_category, price, offer , name, description, ingredients, image_src, brand, price_per_unit, unit]
-                        print(item_in_list_form[1:])
                         #product = db_cache[(name,brand)]
                         #key = (brand, name)
-                        if float(db_cache[(name,brand)][2]) != float(price) or db_cache[(name,brand)][3] != offer or db_cache[(name,brand)][4] != name or db_cache[(name,brand)][5] != description or db_cache[(name,brand)][6] != ingredients or db_cache[(name,brand)][7] != image_src or db_cache[(name,brand)][8] != brand or float(db_cache[(name,brand)][9]) != float(price_per_unit) or db_cache[(name,brand)][10] != unit:
-                            ok = 0
+                        if float(db_cache[(name,brand)][2]) != float(price) or float(db_cache[(name,brand)][3]) != float(price_per_unit) or db_cache[(name,brand)][4] != unit or db_cache[(name,brand)][5] != offer or db_cache[(name,brand)][6] != name or db_cache[(name,brand)][7] != brand or db_cache[(name,brand)][8] != description or db_cache[(name,brand)][9] != image_src or db_cache[(name,brand)][10] != ingredients:
                             if float(db_cache[(name,brand)][2]) != float(price):
                                 print(f"Pretul difera: {float(db_cache[(name,brand)][2])} vs {float(price)}")
-                            if db_cache[(name,brand)][3] != offer:
-                                print(f"Promotia difera: {db_cache[(name,brand)][3]} vs {offer}")
-                            if db_cache[(name,brand)][4] != name:
-                                print(f"Numele difera: {db_cache[(name,brand)][4]} vs {name}")
-                            if db_cache[(name,brand)][5] != description:
-                                print(f"Descrierea difera: {db_cache[(name,brand)][5]} vs {description}")
-                            if db_cache[(name,brand)][6] != ingredients:
-                                print(f"Ingredientele difera: {db_cache[(name,brand)][6]} vs {ingredients}")
-                            if db_cache[(name,brand)][7] != image_src:
-                                print(f"Sursa imaginii difera: {db_cache[(name,brand)][7]} vs {image_src}")
-                            if db_cache[(name,brand)][8] != brand:
-                                print(f"Brand-ul difera: {db_cache[(name,brand)][8]} vs {brand}")
-                            if float(db_cache[(name,brand)][9]) != float(price_per_unit):
-                                print(f"PPU difera: {float(db_cache[(name,brand)][9])} vs {float(price_per_unit)}")
-                            if db_cache[(name,brand)][10] != unit:
-                                print(f"Unitatea difera: {db_cache[(name,brand)][10]} vs {unit}")
+                            if float(db_cache[(name,brand)][3]) != float(price_per_unit):
+                                print(f"PPU difera: {db_cache[(name,brand)][3]} vs {price_per_unit}")
+                            if db_cache[(name,brand)][4] != unit:
+                                print(f"Unitatea difera: {db_cache[(name,brand)][4]} vs {unit}")
+                            if db_cache[(name,brand)][5] != offer:
+                                print(f"Oferta difera: {db_cache[(name,brand)][5]} vs {offer}")
+                            if db_cache[(name,brand)][6] != name:
+                                print(f"Numele difera: {db_cache[(name,brand)][6]} vs {name}")
+                            if db_cache[(name,brand)][7] != brand:
+                                print(f"Brand-ul difera: {db_cache[(name,brand)][7]} vs {brand}")
+                            if db_cache[(name,brand)][8] != description:
+                                print(f"Descrierea difera: {db_cache[(name,brand)][8]} vs {description}")
+                            if db_cache[(name,brand)][9] != image_src:
+                                print(f"Imaginea difera: {db_cache[(name,brand)][9]} vs {image_src}")
+                            if db_cache[(name,brand)][10] != ingredients:
+                                print(f"Ingredientele difera: {db_cache[(name,brand)][10]} vs {ingredients}")
                             cursor = connection.cursor()
                             sql = "UPDATE product SET price = %s, offer = %s, product_name = %s, product_description = %s, ingredients = %s, image_src = %s, product_brand = %s, price_per_unit = %s, unit = %s WHERE id_category = %s AND product_name = %s AND product_brand = %s"
                             val = (price, offer, name, description, ingredients, image_src, brand, price_per_unit, unit, id_category, name, brand)
@@ -291,7 +303,6 @@ while True:
                         cursor.close()
                         
                     print("\n")
-                    driver.quit()
                     
                 print(len(items))
                 id_category += 1 # contorizare id categorie
