@@ -29,6 +29,32 @@
     $results_per_page = 20; // products per page
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $start_from = ($page - 1) * $results_per_page;
+
+    function price_discount_megaimage($offer_string, &$loyalty_card, &$offer_percentage, &$offer_multi_product) {
+
+    $loyalty_card = 0;
+    $offer_percentage = 0;
+    $offer_multi_product = 0;
+                                        
+    if (strchr($offer_string, "CONNECT") != False){
+        $loyalty_card = 1;
+    }
+    if (strpos($offer_string, '-') != False || strpos($offer_string, '-') == 0) {
+        $offer_percentage = substr($offer_string, strpos($offer_string, '-') + 1, strpos($offer_string, '%') - strpos($offer_string, '-') -1);
+    }
+        if (strpos($offer_string, "-lea") != False) {   
+        $offer_multi_product = 1;
+        $offer_per_product = round($offer_percentage/$offer_string[strpos($offer_string, "-lea") - 1], 2);
+    }
+    if (strpos($offer_string, "comanzi ") != False && strpos($offer_string, "platesti ") != False) {
+        $offer_percentage = (round((intval($offer_string[strpos($offer_string, "platesti ") + 9])) / (intval($offer_string[strpos($offer_string, "comanzi ") + 8])), 2))*100;
+        $offer_multi_product = 1;
+    }
+
+    //echo $offer_string[strpos($offer_string, "platesti ") + 9] . " strpos<br>";
+    //echo $offer_string[strpos($offer_string, "comanzi ") + 8] . " strposs<br>";
+    //echo $loyalty_card . "<br>" . $offer_percentage . "<br>" . $offer_multi_product . "<br><br>";
+}
 ?>
 
 <!DOCTYPE html>
@@ -144,6 +170,7 @@
                 // Show products
                 if($records) {
                     foreach ($records as $record) {
+                        price_discount_megaimage($record['offer'],$loyalty_card, $offer_percentage, $offer_multi_product);
                         ?>
                         <div class="product-card">
                             <h3><?php echo htmlspecialchars($record['product_brand'] . " " . $record['product_name']); ?></h3>
@@ -152,15 +179,11 @@
 
                             <div class="price-box">
                                 <?php if($record['offer'] != 0): ?>
-                                    <span class="current-price"><?php echo $record['price']; ?> Lei</span>
+                                    <span class="current-price"><?php echo round($record['price'] - $record['price'] * $offer_percentage / 100, 2); ?> Lei</span>
                                     <br>
-                                    <?php 
-                                        // Calculate original price
-                                        #$originalPrice = ($record['price'] * 100) / (100 + $record['offer']);
-                                    ?>
                                     <!-- <span class="original-price"><?php #echo round($originalPrice, 2); ?> Lei</span> -->
                                     <!-- <span class="discount-badge">(<?php #echo abs($record['offer']); ?>% OFF)</span> -->
-                                     <span class="original-price"> <?php echo $record['price'] ?></span>
+                                     <span class="original-price"> <?php echo $record['price'] . " Lei" ?></span>
                                      <span class="discount-badge"><?php echo $record['offer'] ?></span>
                                 <?php else: ?>
                                     <span class="current-price"><?php echo $record['price']; ?> Lei</span>
