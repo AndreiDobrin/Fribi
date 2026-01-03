@@ -12,9 +12,16 @@
 
         if(isset($_POST['email']) && isset($_POST['nume']) && isset($_POST['prenume']))  {
             $secret = getenv('RECAPTCHA_SECRET_KEY');
-
+                $whitelist = ['127.0.0.1', '::1', 'localhost'];
+                $isLocal = in_array($_SERVER['REMOTE_ADDR'], $whitelist) || $_SERVER['SERVER_NAME'] === 'localhost';
             $captcha_response = $_POST['g-recaptcha-response'] ?? '';
-    
+                    $captchaSuccess = false;
+
+                if ($isLocal) {
+                    // AUTOMATICALLY PASS if local
+                    $captchaSuccess = true;
+                }
+                else {
             $verifyResponse = file_get_contents('https://www.google.com/recaptcha/api/siteverify?secret='.$secret.'&response='.$_POST['g-recaptcha-response']);            $responseData = json_decode($verifyResponse);
             
             if(!$responseData->success) {
@@ -23,6 +30,7 @@
                 exit;
             }
             $email = $_POST['email'];
+        }
 
         try {
             $pdo = Database::getInstance()->getConnection();

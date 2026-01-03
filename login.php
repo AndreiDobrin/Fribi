@@ -57,8 +57,6 @@ require_once 'database.php';
                             echo "<h3>Please complete the CAPTCHA validation.</h3>";
                         }
                         else {
-                        
-                
                             try {
                                 $pdo = Database::getInstance()->getConnection();
                                 $sql = "SELECT email,parola FROM user WHERE email = ?";
@@ -67,6 +65,10 @@ require_once 'database.php';
                                 $email = $_POST['email'];
                                 $stmt->execute([$email]);
                                 $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+                                if(!$results) {
+                                    echo "Error, please try again later.";
+                                }
+                                else {
                                     echo $results[0]['parola'];
                                 $inputted_password = $_POST['parola'];
                                 if($inputted_password == $results[0]['parola']) {
@@ -85,7 +87,8 @@ require_once 'database.php';
                                     <<<HTML
                                         <h3> CREDENTIALE INVALIDE </h3>
                                     HTML;
-                                }
+                                }                                
+                            }
                                 //echo "<script type='text/javascript'>alert($results[email]);</script>";
                             } catch (PDOException $e) {
                             die("❌ Connection failed: " . $e->getMessage());

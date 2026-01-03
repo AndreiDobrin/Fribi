@@ -191,7 +191,10 @@
                             </div>
 
                             <p class="unit-price"><?php echo $record['price_per_unit'] . ' Lei/' . $record['unit']; ?></p>
-                            <button type="button">Add to cart</button>
+                            <form action="add_to_cart.php" method="post" style="display:inline;">
+                                <input type="hidden" name="product_id" value="<?php echo $record['id']; ?>">
+                                <button type="submit">Add to cart</button>
+                            </form>
                             <button type="button">Add to favorites</button>
                         </div>
                         <?php
