@@ -191,11 +191,16 @@
                             </div>
 
                             <p class="unit-price"><?php echo $record['price_per_unit'] . ' Lei/' . $record['unit']; ?></p>
-                            <form action="add_to_cart.php" method="post" style="display:inline;">
-                                <input type="hidden" name="product_id" value="<?php echo $record['id']; ?>">
-                                <button type="submit">Add to cart</button>
-                            </form>
-                            <button type="button">Add to favorites</button>
+                            <div style="display: flex; justify-content: space-around; margin-top: 10px;">
+                                <form action="add_to_cart.php" method="post">
+                                     <input type="hidden" name="product_id" value="<?php echo $record['id']; ?>">
+                                     <button type="submit">Add to Cart</button>
+                                </form>
+                                                            
+                                <a href="price_history.php?product_id=<?php echo $record['id']; ?>" style="text-decoration: none;">
+                                    <button type="button" style="background-color: #5bc0de;">History</button>
+                                </a>
+                            </div>
                         </div>
                         <?php
                     }

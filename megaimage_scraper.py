@@ -266,6 +266,19 @@ while True:
                         if float(db_cache[(name,brand)][2]) != float(price) or float(db_cache[(name,brand)][3]) != float(price_per_unit) or db_cache[(name,brand)][4] != unit or db_cache[(name,brand)][5] != offer or db_cache[(name,brand)][6] != name or db_cache[(name,brand)][7] != brand or db_cache[(name,brand)][8] != description or db_cache[(name,brand)][9] != image_src or db_cache[(name,brand)][10] != ingredients:
                             if float(db_cache[(name,brand)][2]) != float(price):
                                 print(f"Pretul difera: {float(db_cache[(name,brand)][2])} vs {float(price)}")
+                                
+                                try:
+                                    product_id = db_cache[(name,brand)][0]
+                                    old_price = db_cache[(name,brand)][2]
+                                    history_cursor = connection.cursor()
+                                    history_sql = "INSERT INTO price_history (id_product, price) VALUES (%s, %s)"
+                                    history_cursor.execute(history_sql, (product_id, old_price))
+                                    connection.commit()
+                                    history_cursor.close()
+                                    print(f"Logged old price ({old_price}) to history for product ID {product_id}")
+                                except Error as err:
+                                    print(f"Failed to log price history: {err}")
+                                    
                             if float(db_cache[(name,brand)][3]) != float(price_per_unit):
                                 print(f"PPU difera: {db_cache[(name,brand)][3]} vs {price_per_unit}")
                             if db_cache[(name,brand)][4] != unit:
