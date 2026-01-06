@@ -9,18 +9,31 @@
 <body>
     <div class="topnav">
         <a class="active" href="index.php">Home</a>
-        <a href="search.php">Search</a>
         <?php
-            if($_SESSION['username']) {
-                echo '<a href="logout.php">Log out</a>';
-                echo "<a>".$_SESSION['username']. "</a>";
-                echo '<a href="register.php">Register</a>';
+            
+            if($_SESSION['privilege'] == 'Admin') {
+                echo '<a href="search.php">Search</a>';
+            }
+
+            echo '<a id="username">' . htmlspecialchars($_SESSION['username']) . '</a>';
+
+            if($_SESSION['username'] != 'Guest') {
+                echo '<a id="log" href="logout.php">Log out</a>';
             }
             else {
-                echo '<a href="login.php">Log in</a>';
+                echo '<a id="log" href="login.php">Log in</a>';
+                echo '<a id="log" href="register.php">Register</a>';
             }
         ?>
-    </div>    
+        <?php if($_SESSION['username'] != 'Guest') { ?>
+                <a href="favorites.php" style="margin-left: auto; margin-right: 0;">Favorites </a>
+            <?php } ?>
+        
+        <a href="shopping_cart.php" id="shopping_cart_icon">
+            <img src=   "shopping-cart-icon.png" height="20" width="20">
+        </a>
+            
+    </div>
 
 <?php
     require_once 'database.php';
@@ -66,6 +79,10 @@
 
             $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
             //var_dump($results);
+            if(empty($results)) {
+                echo "No results found";
+            }
+            else {
             foreach($results as $result) {
                 echo '<div id="result">';
                 foreach($table_columns as $table_column) {
@@ -84,6 +101,7 @@
                 </form>
             HTML;
             }
+        }
 /*
             foreach($results as $result) {
 

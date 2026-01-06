@@ -64,9 +64,31 @@ try {
 </head>
 <body>
     <div class="topnav">
-        <a href="index.php">Home</a>
-        <a class="active" href="shopping_cart.php">Cart</a>
-        <a href="logout.php">Log out</a>
+        <a class="active" href="index.php">Home</a>
+        <?php
+            
+            if($_SESSION['privilege'] == 'Admin') {
+                echo '<a href="search.php">Search</a>';
+            }
+
+            echo '<a id="username">' . htmlspecialchars($_SESSION['username']) . '</a>';
+
+            if($_SESSION['username'] != 'Guest') {
+                echo '<a id="log" href="logout.php">Log out</a>';
+            }
+            else {
+                echo '<a id="log" href="login.php">Log in</a>';
+                echo '<a id="log" href="register.php">Register</a>';
+            }
+        ?>
+        <?php if($_SESSION['username'] != 'Guest') { ?>
+                <a href="favorites.php" style="margin-left: auto; margin-right: 0;">Favorites </a>
+            <?php } ?>
+        
+        <a href="shopping_cart.php" id="shopping_cart_icon">
+            <img src=   "shopping-cart-icon.png" height="20" width="20">
+        </a>
+            
     </div>
 
     <div class="cart-container">

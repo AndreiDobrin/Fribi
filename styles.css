@@ -9,19 +9,27 @@
 }
 
 /* Style the links inside the navigation bar */
+
+.topnav #username {
+    margin-left:auto;
+}
+
+
+
 .topnav a {
   color: #000000;
   text-align: center;
-  padding: 14px 16px;
+  padding: 12px 15px;
   text-decoration: none;
   font-size: 17px;
   justify-content: left;
 }
-.topnav #shopping_cart_icon {
-    margin-right:10px;
-    margin-left:auto;
-    padding: 10px;
-}
+
+
+
+
+
+
 
 /* Change the color of links on hover */
 .topnav a:hover {

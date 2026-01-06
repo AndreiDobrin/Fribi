@@ -1,5 +1,6 @@
 <?php
     session_start();
+    ob_start();
 
     if(empty($_SESSION['username'])) {
         // header('Location: login.php');
@@ -11,10 +12,6 @@
     if(isset($_SESSION['status'])) {
         $status = $_SESSION['status'];
         unset($_SESSION['status']);
-    }
-
-    if (!empty($status)) {
-        echo "<div class='status-message'>" . htmlspecialchars($status) . "</div>";
     }
     require_once 'database.php';
     try {
@@ -66,7 +63,6 @@
 </head>
 
 <body>
-    <h1><?php echo htmlspecialchars($_SESSION['privilege']); ?></h1>
 
     <div class="topnav">
         <a class="active" href="index.php">Home</a>
@@ -75,23 +71,30 @@
             if($_SESSION['privilege'] == 'Admin') {
                 echo '<a href="search.php">Search</a>';
             }
+
+            echo '<a id="username">' . htmlspecialchars($_SESSION['username']) . '</a>';
+
             if($_SESSION['username'] != 'Guest') {
-                echo '<a href="logout.php">Log out</a>';
-                echo "<a>".$_SESSION['username']. "</a>";
+                echo '<a id="log" href="logout.php">Log out</a>';
             }
             else {
-                echo '<a href="login.php">Log in</a>';
-                echo '<a href="register.php">Register</a>';
+                echo '<a id="log" href="login.php">Log in</a>';
+                echo '<a id="log" href="register.php">Register</a>';
             }
         ?>
-            <a href="shopping_cart.php" id="shopping_cart_icon">
-                <img src="shopping-cart-icon.png" height="25" width="25">
-            </a>
+        <?php if($_SESSION['username'] != 'Guest') { ?>
+                <a href="favorites.php" id="log">Favorites</a>
+            <?php } ?>
+        
+        <a href="shopping_cart.php" id="shopping_cart_icon">
+            <img src=   "shopping-cart-icon.png" height="20" width="20">
+        </a>
+            
     </div>
 
     <div style="margin: 20px; text-align: left;">
         <form action="" method="GET">
-                <input type="checkbox" name="filter" value="offers">Show Offers Only</button>
+                <input type="checkbox" name="filter" value="offers">Show Offers Only
             <select name="category" id="category">
                 <option value="all">All Categories</option>
                 <?php
@@ -113,14 +116,13 @@
                     echo '</select>';
                 ?>
             <input type="submit" value="Search" style="margin-right:10px">
-            %%TOTAL%% Results
+                %%TOTAL%% Results
             </form>
             
             </div>
     <div class="product-grid">
         <?php
             try {
-                // Build query dynamically
                 $sql = "SELECT * FROM PRODUCT";
                 $whereClauses = [];
                 $params = [];
@@ -132,11 +134,10 @@
 
                 // Handle Category Filter
                 if (isset($_GET['category']) && $_GET['category'] != 'all') {
-                    // (Ideally, <option> value should be the ID, not the name, to skip this loop)
                     $catId = 0;
                     foreach($allCategories as $index => $catRow) {
                         if($catRow[0] == $_GET['category']) {
-                            $catId = $index + 1; // Assuming IDs start at 1 and match index
+                            $catId = $index + 1;
                             break;
                         }
                     }
@@ -181,8 +182,6 @@
                                 <?php if($record['offer'] != 0): ?>
                                     <span class="current-price"><?php echo round($record['price'] - $record['price'] * $offer_percentage / 100, 2); ?> Lei</span>
                                     <br>
-                                    <!-- <span class="original-price"><?php #echo round($originalPrice, 2); ?> Lei</span> -->
-                                    <!-- <span class="discount-badge">(<?php #echo abs($record['offer']); ?>% OFF)</span> -->
                                      <span class="original-price"> <?php echo $record['price'] . " Lei" ?></span>
                                      <span class="discount-badge"><?php echo $record['offer'] ?></span>
                                 <?php else: ?>
@@ -196,6 +195,13 @@
                                      <input type="hidden" name="product_id" value="<?php echo $record['id']; ?>">
                                      <button type="submit">Add to Cart</button>
                                 </form>
+
+                            <?php if($_SESSION['username'] != 'Guest'): ?>
+                            <form action="add_to_favorites.php" method="post">
+                                    <input type="hidden" name="product_id" value="<?php echo $record['id']; ?>">
+                                    <button type="submit" style="background-color: #ff4d4d;">❤</button>
+                            </form>
+                            <?php endif; ?>
                                                             
                                 <a href="price_history.php?product_id=<?php echo $record['id']; ?>" style="text-decoration: none;">
                                     <button type="button" style="background-color: #5bc0de;">History</button>

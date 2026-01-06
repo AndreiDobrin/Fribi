@@ -125,6 +125,15 @@
         FOREIGN KEY (id_product) REFERENCES product(id) ON DELETE CASCADE
     );
 
+    CREATE TABLE favorites (
+        id_user INT NOT NULL,
+        id_product INT NOT NULL,
+        added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (id_user, id_product),
+        FOREIGN KEY (id_user) REFERENCES user(id) ON DELETE CASCADE,
+        FOREIGN KEY (id_product) REFERENCES product(id) ON DELETE CASCADE
+    );
+
 
     INSERT INTO category (nume)
     VALUES ("Fructe si legume proaspete"), ("Lactate si oua"), ("Mezeluri, carne si ready meal"), ("Produse congelate"), ("Paine, cafea, cereale si mic dejun"), ("Dulciuri si snacks"), ("Ingrediente culinare"), ("Apa si sucuri"), ("Bauturi"), ("Equilibrium") ,("Curatenie si nealimentare") ,("Mama si ingrijire copil"), ("Cosmetice si ingrijire personala"), ("Animale de companie");
